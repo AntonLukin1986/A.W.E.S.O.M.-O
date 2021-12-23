@@ -533,7 +533,7 @@ def who_is_unknown(update, context):
 
 
 def test(update, context):  # тест автодеплоя Heroku
-    """Ответ бота на сообщение "Ку-ку"."""
+    """Ответ бота на сообщение "Ну ясно"."""
     chat = update.effective_chat
     text = 'Умнее ничего не мог придумать?'
     context.bot.send_message(chat_id=chat.id, text=text)
@@ -543,7 +543,7 @@ def main():
     """Основная функция запуска бота."""
     updater = Updater(token=token)
     updater.dispatcher.add_handler(  # тест автодеплоя Heroku
-        MessageHandler(Filters.regex('Ку-ку'), test)
+        MessageHandler(Filters.regex('Ну ясно'), test)
     )
     updater.dispatcher.add_handler(
         MessageHandler(Filters.regex('Котика хочу'), show_cat_picture)
