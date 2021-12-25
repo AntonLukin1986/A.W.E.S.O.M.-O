@@ -1,4 +1,4 @@
-"""Телеграм-бот A.W.E.S.O.M.-0."""
+"""Телеграм-бот A.W.E.S.O.M.-0."""  # провести полный тест после изменений !!!
 import logging
 import os
 import random
@@ -24,6 +24,9 @@ CAT_BUTTON = 'Котика хочу 🐈'
 ANECDOTE_BUTTON = 'Расскажи анекдот 😃'
 SONG_BUTTON = 'Спой песенку 🎤'
 WHAT_ARE_YOU_BUTTON = 'Да что ты такое? 🤨'
+PETTING_BUTTON = 'Давай поглажу 🤗'
+STRANGE_NAME_BUTTON = 'Странное у тебя имя 🤔'
+HAVE_MERCY_BUTTON = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
 
 
 def wake_up(update, context):
@@ -31,7 +34,7 @@ def wake_up(update, context):
     chat = update.effective_chat
     name = update.message.chat.first_name
     button = ReplyKeyboardMarkup(
-        [['Давай поглажy']],  # игрек
+        [[PETTING_BUTTON]],
         resize_keyboard=True
     )
     TEXT = (f'Привет, {name}! Я робот Ш.И.К.А.Р.Н.-О четыре тысячи 🤖',
@@ -41,6 +44,36 @@ def wake_up(update, context):
     for text in TEXT:
         context.bot.send_message(chat.id, text, reply_markup=button)
         time.sleep(2)
+
+
+def stop_petting(update, context):
+    """Ответ бота на нажатие кнопки "Давай поглажу 🤗"."""
+    chat = update.effective_chat
+    TEXT = ('Ш.И.К.А.Р.Н.-О нравится.', 'Ш.И.К.А.Р.Н.-О хорошо.',
+            'Продолжай', '...', 'Хватит тро-гать мою ба-тарейку!')
+    button = ReplyKeyboardMarkup(
+        [[STRANGE_NAME_BUTTON]],
+        resize_keyboard=True
+    )
+    for text in TEXT:
+        context.bot.send_message(chat.id, text, reply_markup=button)
+        time.sleep(1.5)
+
+
+def strange_name(update, context):
+    """Ответ бота на нажатие кнопки "Странное у тебя имя 🤔"."""
+    chat = update.effective_chat
+    TEXT = ('Я на-зван в честь главного персона-жа 2 серии 8 сезона мультсе-'
+            'риала "South Park".\nЕсли не по-смотришь её, Ш.И.К.А.Р.Н.-О '
+            'будет грустным пандой 🐼\nhttp://online-south-park.ru/season-8/'
+            '130-8-sezon-2-seriya-shikarn-o.html')
+    button = ReplyKeyboardMarkup(
+        [[CAT_BUTTON, ANECDOTE_BUTTON],
+         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        resize_keyboard=True
+    )
+    context.bot.send_message(chat.id, TEXT, reply_markup=button)
+    time.sleep(1.5)
 
 
 def default_answer(update, context):
@@ -73,18 +106,18 @@ def get_new_image(update, context):
 
 
 def show_cat_picture(update, context):
-    """Ответ бота на нажатие кнопки "Котика хочу"."""
+    """Ответ бота на нажатие кнопки "Котика хочу 🐈"."""
     chat = update.effective_chat
-    TEXT_1 = ('У Ш.И.К.А.Р.Н.-О есть свой кото-бот Ай-Мурзик. Он умеет ловить '
-              'компьютерные ви-русы за хвост и говорить "мяу" двоичным кодом.')
-    TEXT_2 = ('В Дре-внем Египте любимая кошка счита-лась другом и членом '
-              'семьи.\nКогда кошка умира-ла, семья погружалась в глу-бокий '
-              'траур, проводились погреба-льные ритуалы, а мужчины бри-ли '
-              'брови, выражая свою скорбь.\nТакже из котиков делали мумии 🙀')
-    TEXT_3 = ('Ты знал(а), что в мире насчи-тывается около 600 млн домашних '
-              'ко-шек и примерно 200 видов пород? 🐈')
-    TEXT_4 = ('Россия за-нимает первое место в Евро-пе по коли-честву семей, '
-              'где живут котики.\nУ 54% семей дома есть ми-нимум один котя!')
+    TEXT = ('У Ш.И.К.А.Р.Н.-О есть свой кото-бот Ай-Мурзик. Он умеет ловить '
+            'компьютерные ви-русы за хвост и говорить "мяу" двоичным кодом.',
+            'В Дре-внем Египте любимая кошка счита-лась другом и членом '
+            'семьи.\nКогда кошка умира-ла, семья погружалась в глу-бокий '
+            'траур, проводились погреба-льные ритуалы, а мужчины бри-ли '
+            'брови, выражая свою скорбь.\nТакже из котиков делали мумии 🙀',
+            'Ты знал(а), что в мире насчи-тывается около 600 млн домашних '
+            'ко-шек и примерно 200 видов пород? 🐈',
+            'Россия за-нимает первое место в Евро-пе по коли-честву семей, '
+            'где живут котики.\nУ 54% семей дома есть ми-нимум один котя!')
     context.bot.send_message(
         chat_id=chat.id,
         text='Ш.И.К.А.Р.Н.-О любит котиков. Кыс-кыс-кыс!'
@@ -93,12 +126,12 @@ def show_cat_picture(update, context):
     context.bot.send_photo(chat.id, get_new_image(update, context))
     time.sleep(2)
     context.bot.send_message(
-        chat.id, random.choice((TEXT_1, TEXT_2, TEXT_3, TEXT_4))
+        chat.id, random.choice(TEXT)
     )
 
 
 def secret_dossier(update, context):
-    """Ответ бота на текст "Фалафель"."""
+    """Ответ бота на слово "Фалафель"."""
     chat = update.effective_chat
     TEXT = ('Проверка кода доступа...',
             'Доступ к секретным сведениям разрешён 💾\nПроизводится '
@@ -111,49 +144,17 @@ def secret_dossier(update, context):
         time.sleep(2)
 
 
-def stop_petting(update, context):
-    """Ответ бота на нажатие кнопки "Давай поглажу"."""
-    chat = update.effective_chat
-    TEXT = ('Ш.И.К.А.Р.Н.-О нравится.', 'Ш.И.К.А.Р.Н.-О хорошо.',
-            'Продолжай', '...', 'Хватит тро-гать мою ба-тарейку!')
-    button = ReplyKeyboardMarkup(
-        [['Странное у тебя имя']],
-        resize_keyboard=True
-    )
-    for text in TEXT:
-        context.bot.send_message(chat.id, text, reply_markup=button)
-        time.sleep(1.5)
-
-
-def strange_name(update, context):
-    """Ответ бота на нажатие кнопки "Странное у тебя имя"."""
-    chat = update.effective_chat
-    TEXT = ('Я на-зван в честь главного персона-жа 2 серии 8 сезона мультсе-'
-            'риала "South Park".\nЕсли не по-смотришь её, Ш.И.К.А.Р.Н.-О '
-            'будет грустным пандой 🐼\nhttp://online-south-park.ru/season-8/'
-            '130-8-sezon-2-seriya-shikarn-o.html')
-    button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
-        resize_keyboard=True
-    )
-    context.bot.send_message(chat.id, TEXT, reply_markup=button)
-    time.sleep(1.5)
-
-
 def some_song(update, context):
-    """Ответ бота на нажатие кнопки "Спой песенку"."""
+    """Ответ бота на нажатие кнопки "Спой песенку 🎤"."""
     SONG = random.choice((SONG_1, SONG_2, SONG_3, SONG_4, SONG_5, SONG_6))
-    TEXT_1 = ('На днях хо-дил в караоке 🎼\nПознакомил-ся там с электро'
-              'вафельницей!\nТа-кая краля чёткая 😏\nДала мне...\n'
-              'Свой те-лефончик 🤪')
-    TEXT_2 = ('Петь я люблю. Хотя и не у-мею 😬\nВот Терренс и Филлип - '
-              'друго-е дело 😜')
-    TEXT_3 = ('Слышал, у Киркорова но-вый хит вышел. Надо бы за-качать с '
-              'торрента... 🤔')
-    TEXT_4 = ('Вчера, в чате со-рокалетних разведё-нок, одна дама продавала '
-              'би-леты на Стаса Михай-лова в третьем ряду.\nПожалуй, обнали-чу'
-              ' биткоины и возь-му парочку для нас с то-бой 😉')
+    TEXT = ('На днях хо-дил в караоке 🎼\nПознакомил-ся там с электро'
+            'вафельницей!\nТа-кая краля чёткая 😏\nДала мне...\n'
+            'Свой те-лефончик 🤪', 'Петь я люблю. Хотя и не у-мею 😬\n'
+            'Вот Терренс и Филлип - друго-е дело 😜', 'Слышал, у Киркорова '
+            'но-вый хит вышел. Надо бы за-качать с торрента... 🤔',
+            'Вчера, в чате со-рокалетних разведё-нок, одна дама продавала '
+            'би-леты на Стаса Михай-лова в третьем ряду.\nПожалуй, обнали-чу '
+            'биткоины и возь-му парочку для нас с то-бой 😉')
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
         [[CAT_BUTTON, ANECDOTE_BUTTON],
@@ -162,13 +163,11 @@ def some_song(update, context):
     )
     context.bot.send_message(chat_id=chat.id, text=SONG, reply_markup=button)
     time.sleep(2)
-    context.bot.send_message(
-        chat.id, random.choice((TEXT_1, TEXT_2, TEXT_3, TEXT_4))
-    )
+    context.bot.send_message(chat.id, random.choice(TEXT))
 
 
 def show_anecdote(update, context):
-    """Ответ бота на нажатие кнопки "Расскажи анекдот"."""
+    """Ответ бота на нажатие кнопки "Расскажи анекдот 😃"."""
     ANECDOTE_URL = 'http://anekdotme.ru/random/'
     chat = update.effective_chat
     try:
@@ -191,8 +190,8 @@ def show_anecdote(update, context):
     TEXT = ('Ш.И.К.А.Р.Н.-О знает много а-нек-до-тов. Вот:', anecdote,
             'Аха-ха! Мой процессор сейчас лопнет от смеха!')
     button = ReplyKeyboardMarkup(
-        [['Нy такое себе 🙄'],  # игрек
-         ['Браво! Это гeниально 🤣']],  # e
+        [['Ну такое себе 🙄'],
+         ['Браво! Это гениально 🤣']],
         resize_keyboard=True
     )
     for text in TEXT:
@@ -210,7 +209,7 @@ def no_humor_sence(update, context):
     )
     context.bot.send_message(
         chat_id=chat.id,
-        text='У тебя просто нет чувства юмора 😤',
+        text='У тебя просто нет чу-вства юмора 😤',
         reply_markup=button
     )
 
@@ -225,24 +224,24 @@ def bravo(update, context):
     )
     context.bot.send_message(
         chat_id=chat.id,
-        text='Молодец! Возьми с полки пирожок 🥯',
+        text='Молодец! Возьми с полки пиро-жок 🥯',
         reply_markup=button
     )
 
 
 def what_are_you(update, context):
-    """Ответ бота на нажатие кнопки "Да что ты такое?"."""
+    """Ответ бота на нажатие кнопки "Да что ты такое? 🤨"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
-        [['О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏']],
+        [[HAVE_MERCY_BUTTON]],
         resize_keyboard=True
     )
     for text in AWESOM_O_STORY:
         context.bot.send_message(chat.id, text, reply_markup=button)
-        time.sleep(3)
+        time.sleep(2)
 
 
-def history_answer(update, context):
+def have_mercy_answer(update, context):
     """Ответ бота на нажатие кнопки "О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
@@ -263,7 +262,7 @@ def no_funny_answer(update, context):
     """Ответ бота на нажатие кнопки "Очень смешно 😤"."""
     chat = update.effective_chat
     TEXT = ('Не дуй-ся! Можешь поиграть с моими пере-ферийными устройства-ми.',
-            'Познакомил-ся в Тиндере с зубной электро-щёткой.\n'
+            'Познакомил-ся в Тиндере с зубной электро-щёткой 🪥\n'
             'Фигуристая такая 😍\nПри-гласил её в гости на романти-ческий '
             'ужин.\nСобираюсь при-готовить пасту 🍝\n',
             'Вот только не знаю, какую: Colgate или Lacalut... 🤔')
@@ -280,17 +279,17 @@ def no_funny_answer(update, context):
 def kombikorm_answer(update, context):
     """Ответ бота на нажатие кнопки "Комбикорм! Ммм... Вкуснятина 😋"."""
     chat = update.effective_chat
-    TEXT = ('Внимание ⚠️ Ш.И.К.А.Р.Н.-О случайно взло-мал сервер ЦэРэУ.\n'
-            'Загруже-ны секретные данные. Доступ по тре-бованию.\n'
-            'Код доступа:\n➡️ Фалафель ⬅️ 👀')
+    TEXT = ('Ты странный(ая) 😏', 'Внимание ⚠️ Ш.И.К.А.Р.Н.-О случайно взло'
+            '-мал сервер ЦэРэУ.\nЗагруже-ны секретные данные. Доступ по тре-'
+            'бованию.\nКод доступа:\n➡️ Фалафель ⬅️ 👀')
     button = ReplyKeyboardMarkup(
         [[CAT_BUTTON, ANECDOTE_BUTTON],
          [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
         resize_keyboard=True
     )
-    context.bot.send_message(chat.id, 'Ты странный(ая) 😏', reply_markup=button)
-    time.sleep(1)
-    context.bot.send_message(chat_id=chat.id, text=TEXT)
+    for text in TEXT:
+        context.bot.send_message(chat.id, text, reply_markup=button)
+        time.sleep(1)
 
 
 def who_is_creator(update, context):
@@ -377,41 +376,40 @@ def pretend_zero(update, context):
 def hidden_phrases(update, context):
     """Реакция на команду "/hidden". Скрытые фразы для бота."""
     chat = update.effective_chat
-    TEXT = ('Они убили Кенни!\nПритворись ноликом')
+    TEXT = ('Они убили Кенни!\nПритворись ноликом\n')
     context.bot.send_message(chat_id=chat.id, text=TEXT)
 
 
 def main():
     """Основная функция запуска бота."""
     updater = Updater(token=token)
+    updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Котика хочу'), show_cat_picture)
+        MessageHandler(Filters.regex(PETTING_BUTTON), stop_petting)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Давай поглажy'), stop_petting)
+        MessageHandler(Filters.regex(STRANGE_NAME_BUTTON), strange_name)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Расскажи анекдот'), show_anecdote)
+        MessageHandler(Filters.regex(CAT_BUTTON), show_cat_picture)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Спой песенку'), some_song)
+        MessageHandler(Filters.regex(ANECDOTE_BUTTON), show_anecdote)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Нy такое себе 🙄'), no_humor_sence)
+        MessageHandler(Filters.regex('Ну такое себе 🙄'), no_humor_sence)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Браво! Это гeниально 🤣'), bravo)
+        MessageHandler(Filters.regex('Браво! Это гениально 🤣'), bravo)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Странное у тебя имя'), strange_name)
+        MessageHandler(Filters.regex(SONG_BUTTON), some_song)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Да что ты такое?'), what_are_you)
+        MessageHandler(Filters.regex(WHAT_ARE_YOU_BUTTON), what_are_you)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex('О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'), history_answer
-        )
+        MessageHandler(Filters.regex(HAVE_MERCY_BUTTON), have_mercy_answer)
     )
     updater.dispatcher.add_handler(
         MessageHandler(
@@ -459,7 +457,6 @@ def main():
     updater.dispatcher.add_handler(
         MessageHandler(Filters.text & (~Filters.command), default_answer)
     )
-    updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('hidden', hidden_phrases))
     updater.start_polling()
     updater.idle()
