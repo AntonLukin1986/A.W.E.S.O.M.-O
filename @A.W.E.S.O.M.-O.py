@@ -1,4 +1,4 @@
-"""Телеграм-бот A.W.E.S.O.M.-0."""  # провести полный тест после изменений !!!
+"""Телеграм-бот A.W.E.S.O.M.-0."""
 import logging
 import os
 import random
@@ -13,7 +13,7 @@ import requests
 from text_for_bot import (
     AWESOM_O_STORY, SONG_1, SONG_2, SONG_3, SONG_4, SONG_5, SONG_6, WHO_IS_KEP,
     WHO_IS_CREATOR, WHO_IS_INNA, WHO_IS_NATASHA, WHO_IS_ZAJA, WHO_IS_MARIK,
-    WHO_IS_MARISHKA
+    WHO_IS_MARISHKA, SHOW_CAT_TEXT, DOSSIER_TEXT, SOME_SONG_TEXT
 )
 
 load_dotenv()
@@ -23,7 +23,7 @@ bot = Bot(token=token)
 CAT_BUTTON = 'Котика хочу 🐈'
 ANECDOTE_BUTTON = 'Расскажи анекдот 😃'
 SONG_BUTTON = 'Спой песенку 🎤'
-WHAT_ARE_YOU_BUTTON = 'Да что ты такое? 🤨'
+WHAT_ARE_YOU_BUTTON = 'Да что ты такое 🤨'
 PETTING_BUTTON = 'Давай поглажу 🤗'
 STRANGE_NAME_BUTTON = 'Странное у тебя имя 🤔'
 HAVE_MERCY_BUTTON = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
@@ -39,8 +39,7 @@ def wake_up(update, context):
     )
     TEXT = (f'Привет, {name}! Я робот Ш.И.К.А.Р.Н.-О четыре тысячи 🤖',
             'Высокоинтеллектуальный нано-кибернетический '
-            'био-резонансный организм.',
-            'Можешь меня погладить 🙃')
+            'био-резонансный организм.', 'Можешь меня погладить 🙃')
     for text in TEXT:
         context.bot.send_message(chat.id, text, reply_markup=button)
         time.sleep(2)
@@ -108,16 +107,6 @@ def get_new_image(update, context):
 def show_cat_picture(update, context):
     """Ответ бота на нажатие кнопки "Котика хочу 🐈"."""
     chat = update.effective_chat
-    TEXT = ('У Ш.И.К.А.Р.Н.-О есть свой кото-бот Ай-Мурзик. Он умеет ловить '
-            'компьютерные ви-русы за хвост и говорить "мяу" двоичным кодом.',
-            'В Дре-внем Египте любимая кошка счита-лась другом и членом '
-            'семьи.\nКогда кошка умира-ла, семья погружалась в глу-бокий '
-            'траур, проводились погреба-льные ритуалы, а мужчины бри-ли '
-            'брови, выражая свою скорбь.\nТакже из котиков делали мумии 🙀',
-            'Ты знал(а), что в мире насчи-тывается около 600 млн домашних '
-            'ко-шек и примерно 200 видов пород? 🐈',
-            'Россия за-нимает первое место в Евро-пе по коли-честву семей, '
-            'где живут котики.\nУ 54% семей дома есть ми-нимум один котя!')
     context.bot.send_message(
         chat_id=chat.id,
         text='Ш.И.К.А.Р.Н.-О любит котиков. Кыс-кыс-кыс!'
@@ -125,21 +114,13 @@ def show_cat_picture(update, context):
     time.sleep(2)
     context.bot.send_photo(chat.id, get_new_image(update, context))
     time.sleep(2)
-    context.bot.send_message(
-        chat.id, random.choice(TEXT)
-    )
+    context.bot.send_message(chat.id, random.choice(SHOW_CAT_TEXT))
 
 
 def secret_dossier(update, context):
     """Ответ бота на слово "Фалафель"."""
     chat = update.effective_chat
-    TEXT = ('Проверка кода доступа...',
-            'Доступ к секретным сведениям разрешён 💾\nПроизводится '
-            'дешифровка данных.', '...\n@.~$*!().№-i+ek*?.L+\n...\n'
-            '\nSuccessful ☑️', 'Доступна информация об объектах:\n'
-            '▶️ Создатель\n▶️ Кэп\n▶️ Няшка\n▶️ Лемур\n▶️ Зажа\n▶️ Марик\n'
-            '▶️ Маришка', 'Шаблон запроса:\n➡️ Кто такой(ая) ... ? ⬅️ 👀')
-    for text in TEXT:
+    for text in DOSSIER_TEXT:
         context.bot.send_message(chat.id, text)
         time.sleep(2)
 
@@ -147,14 +128,6 @@ def secret_dossier(update, context):
 def some_song(update, context):
     """Ответ бота на нажатие кнопки "Спой песенку 🎤"."""
     SONG = random.choice((SONG_1, SONG_2, SONG_3, SONG_4, SONG_5, SONG_6))
-    TEXT = ('На днях хо-дил в караоке 🎼\nПознакомил-ся там с электро'
-            'вафельницей!\nТа-кая краля чёткая 😏\nДала мне...\n'
-            'Свой те-лефончик 🤪', 'Петь я люблю. Хотя и не у-мею 😬\n'
-            'Вот Терренс и Филлип - друго-е дело 😜', 'Слышал, у Киркорова '
-            'но-вый хит вышел. Надо бы за-качать с торрента... 🤔',
-            'Вчера, в чате со-рокалетних разведё-нок, одна дама продавала '
-            'би-леты на Стаса Михай-лова в третьем ряду.\nПожалуй, обнали-чу '
-            'биткоины и возь-му парочку для нас с то-бой 😉')
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
         [[CAT_BUTTON, ANECDOTE_BUTTON],
@@ -163,7 +136,7 @@ def some_song(update, context):
     )
     context.bot.send_message(chat_id=chat.id, text=SONG, reply_markup=button)
     time.sleep(2)
-    context.bot.send_message(chat.id, random.choice(TEXT))
+    context.bot.send_message(chat.id, random.choice(SOME_SONG_TEXT))
 
 
 def show_anecdote(update, context):
@@ -190,7 +163,7 @@ def show_anecdote(update, context):
     TEXT = ('Ш.И.К.А.Р.Н.-О знает много а-нек-до-тов. Вот:', anecdote,
             'Аха-ха! Мой процессор сейчас лопнет от смеха!')
     button = ReplyKeyboardMarkup(
-        [['Ну такое себе 🙄'],
+        [['Ну, такое себе 🙄'],
          ['Браво! Это гениально 🤣']],
         resize_keyboard=True
     )
@@ -230,7 +203,7 @@ def bravo(update, context):
 
 
 def what_are_you(update, context):
-    """Ответ бота на нажатие кнопки "Да что ты такое? 🤨"."""
+    """Ответ бота на нажатие кнопки "Да что ты такое 🤨"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
         [[HAVE_MERCY_BUTTON]],
@@ -251,9 +224,8 @@ def have_mercy_answer(update, context):
     )
     context.bot.send_message(
         chat_id=chat.id,
-        text=('Расслабься! Ш.И.К.А.Р.Н.-О пошутил\n'
-              'Буду кормить тебя ком-бикормом.\n'
-              'Или что вы там еди-те? 😎'),
+        text=('Расслабься! Ш.И.К.А.Р.Н.-О пошутил\nБуду кормить тебя '
+              'ком-бикормом.\nИли что вы там еди-те? 😎'),
         reply_markup=button
     )
 
@@ -262,7 +234,7 @@ def no_funny_answer(update, context):
     """Ответ бота на нажатие кнопки "Очень смешно 😤"."""
     chat = update.effective_chat
     TEXT = ('Не дуй-ся! Можешь поиграть с моими пере-ферийными устройства-ми.',
-            'Познакомил-ся в Тиндере с зубной электро-щёткой 🪥\n'
+            'Я тут недавно в Тиндере познакомил-ся с зубной электро-щёткой 🪥\n'
             'Фигуристая такая 😍\nПри-гласил её в гости на романти-ческий '
             'ужин.\nСобираюсь при-готовить пасту 🍝\n',
             'Вот только не знаю, какую: Colgate или Lacalut... 🤔')
@@ -360,23 +332,38 @@ def who_is_unknown(update, context):
 
 
 def they_killed_kenny(update, context):
-    """Ответ бота на сообщение "Они убили Кенни!"."""
+    """Ответ бота на сообщение "Они убили Кенни"."""
     chat = update.effective_chat
-    context.bot.send_message(chat_id=chat.id, text="Сволочи! 😡")
+    context.bot.send_message(chat_id=chat.id, text='Сволочи! 😡')
+    time.sleep(2)
+    TEXT = ('Поздравляю, поклонник South Park, тебе удалось обнаружить '
+            'одну из пасхалок. Возьми с полки пирожок 😁\n'
+            'И помни: Сказложоп существует!!! 👹')
+    context.bot.send_message(chat_id=chat.id, text=TEXT)
+
+
+def eric_cartman(update, context):
+    """Ответ бота на любое упоминание Эрика Картмана."""
+    chat = update.effective_chat
+    TEXT = ('Странное дело: иногда, когда я перехо-жу в спящий режим, мне снит'
+            '-ся, что я на самом деле мальчик по имени Эрик 🤨\nИ что жи-ву '
+            'я не на сервере, а в малень-ком городке в штате Колорадо, где '
+            'хожу в школу вместе со своими друзь-ями.\nК чему бы это... 🤔')
+    context.bot.send_message(chat_id=chat.id, text=TEXT)
 
 
 def pretend_zero(update, context):
     """Ответ бота на сообщение "Притворись ноликом"."""
     chat = update.effective_chat
     context.bot.send_message(
-        chat_id=chat.id, text="Может мне ещё крестиком начать вы-шивать? 🙄"
+        chat_id=chat.id, text='Может мне ещё крестиком начать вы-шивать? 🙄'
     )
 
 
 def hidden_phrases(update, context):
-    """Реакция на команду "/hidden". Скрытые фразы для бота."""
+    """Реакция на команду /hidden - cкрытые фразы для бота."""
     chat = update.effective_chat
-    TEXT = ('Они убили Кенни!\nПритворись ноликом\n')
+    TEXT = ('Они убили Кенни\nПритворись ноликом\nЭрик Картман\n')
     context.bot.send_message(chat_id=chat.id, text=TEXT)
 
 
@@ -397,7 +384,7 @@ def main():
         MessageHandler(Filters.regex(ANECDOTE_BUTTON), show_anecdote)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Ну такое себе 🙄'), no_humor_sence)
+        MessageHandler(Filters.regex('Ну, такое себе 🙄'), no_humor_sence)
     )
     updater.dispatcher.add_handler(
         MessageHandler(Filters.regex('Браво! Это гениально 🤣'), bravo)
@@ -441,16 +428,19 @@ def main():
         MessageHandler(Filters.regex('Кто такая Маришка'), who_is_marishka)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'Кто так.. \w'), who_is_unknown)
+        MessageHandler(Filters.regex(r'Кто так.. \D+'), who_is_unknown)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Фалафель'), secret_dossier)
+        MessageHandler(Filters.regex(r'^Фалафель$'), secret_dossier)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Они убили Кенни!'), they_killed_kenny)
+        MessageHandler(Filters.regex(r'Они убили Кен+и'), they_killed_kenny)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Притворись ноликом'), pretend_zero)
+        MessageHandler(Filters.regex(r'Эрик\D? Картман\D?'), eric_cartman)
+    )
+    updater.dispatcher.add_handler(
+        MessageHandler(Filters.regex(r'Притворись ноликом'), pretend_zero)
     )
     # Обработчик будет перехватывать все текстовые сообщения,
     # кроме команд: "& (~Filters.command)"
@@ -463,16 +453,16 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s, %(levelname)s, %(message)s, '
-               '%(funcName)s, %(lineno)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.handlers.RotatingFileHandler(
-                __file__ + '.log', maxBytes=10500000,
-                backupCount=2, encoding='utf-8'
-            )
-        ]
-    )
+    # logging.basicConfig(
+    #     level=logging.DEBUG,
+    #     format='%(asctime)s, %(levelname)s, %(message)s, '
+    #            '%(funcName)s, %(lineno)s',
+    #     handlers=[
+    #         logging.StreamHandler(),
+    #         logging.handlers.RotatingFileHandler(
+    #             __file__ + '.log', maxBytes=10500000,
+    #             backupCount=2, encoding='utf-8'
+    #         )
+    #     ]
+    # )
     main()

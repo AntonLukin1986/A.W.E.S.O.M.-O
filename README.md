@@ -7,7 +7,6 @@
 - Python 3.9.9
 - python-telegram-bot
 
-
 ### Запуск проекта в dev-режиме
 
 - Установите и активируйте виртуальное окружение
@@ -16,7 +15,6 @@
 ```
 pip install -r requirements.txt
 ```
-
 
 
 ### Автор
