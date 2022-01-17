@@ -180,9 +180,11 @@ def no_humor_sence(update, context):
          [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
         resize_keyboard=True
     )
+    TEXT = ('У тебя просто нет чу-вства юмора 😤', 'До тебя просто дол-го доход'
+            'ит. Как до жира-фа 🦒', 'Иди смотри Смехопанора-му тогда 😠')
     context.bot.send_message(
         chat_id=chat.id,
-        text='У тебя просто нет чу-вства юмора 😤',
+        text=random.choice(TEXT),
         reply_markup=button
     )
 
@@ -195,9 +197,11 @@ def bravo(update, context):
          [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
         resize_keyboard=True
     )
+    TEXT = ('Молодец! Возьми с полки пиро-жок 🥯', 'Ещё бы! Я учил-ся у самого '
+            'Ви-нокура 😉', 'Смотри, чтоб пу-пок от смеха не развя-зался 🙈')
     context.bot.send_message(
         chat_id=chat.id,
-        text='Молодец! Возьми с полки пиро-жок 🥯',
+        text=random.choice(TEXT),
         reply_markup=button
     )
 
@@ -356,7 +360,7 @@ def pretend_zero(update, context):
     """Ответ бота на сообщение "Притворись ноликом"."""
     chat = update.effective_chat
     context.bot.send_message(
-        chat_id=chat.id, text='Может мне ещё крестиком начать вы-шивать? 🙄'
+        chat_id=chat.id, text='Может мне ещё крес-тиком начать выши-вать? 🙄'
     )
 
 
@@ -453,16 +457,16 @@ def main():
 
 
 if __name__ == '__main__':
-    # logging.basicConfig(
-    #     level=logging.DEBUG,
-    #     format='%(asctime)s, %(levelname)s, %(message)s, '
-    #            '%(funcName)s, %(lineno)s',
-    #     handlers=[
-    #         logging.StreamHandler(),
-    #         logging.handlers.RotatingFileHandler(
-    #             __file__ + '.log', maxBytes=10500000,
-    #             backupCount=2, encoding='utf-8'
-    #         )
-    #     ]
-    # )
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s, %(levelname)s, %(message)s, '
+               '%(funcName)s, %(lineno)s',
+        handlers=[
+            logging.StreamHandler(),
+            logging.handlers.RotatingFileHandler(
+                __file__ + '.log', maxBytes=2100000,
+                backupCount=2, encoding='utf-8'
+            )
+        ]
+    )
     main()
