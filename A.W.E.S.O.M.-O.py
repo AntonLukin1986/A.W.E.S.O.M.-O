@@ -13,7 +13,8 @@ import requests
 from text_for_bot import (
     AWESOM_O_STORY, SONG_1, SONG_2, SONG_3, SONG_4, SONG_5, SONG_6, WHO_IS_KEP,
     WHO_IS_CREATOR, WHO_IS_INNA, WHO_IS_NATASHA, WHO_IS_ZAJA, WHO_IS_MARIK,
-    WHO_IS_MARISHKA, SHOW_CAT_TEXT, DOSSIER_TEXT, SOME_SONG_TEXT
+    WHO_IS_MARISHKA, SHOW_CAT_TEXT, DOSSIER_TEXT, SOME_SONG_TEXT,
+    MARKLAR_ANSWER
 )
 
 load_dotenv()
@@ -352,7 +353,7 @@ def eric_cartman(update, context):
     TEXT = ('Странное дело: иногда, когда я перехо-жу в спящий режим, мне снит'
             '-ся, что я на самом деле мальчик по имени Эрик 🤨\nИ что жи-ву '
             'я не на сервере, а в малень-ком городке в штате Колорадо, где '
-            'хожу в школу вместе со своими друзь-ями.\nК чему бы это... 🤔')
+            'хожу в школу вместе со своими друзь-ями.\nК чему бы это?.. 🤔')
     context.bot.send_message(chat_id=chat.id, text=TEXT)
 
 
@@ -364,10 +365,17 @@ def pretend_zero(update, context):
     )
 
 
+def marklar(update, context):
+    """Ответ бота на сообщение "Марклар"."""
+    chat = update.effective_chat
+    context.bot.send_message(chat_id=chat.id, text=MARKLAR_ANSWER)
+
+
 def hidden_phrases(update, context):
     """Реакция на команду /hidden - cкрытые фразы для бота."""
     chat = update.effective_chat
-    TEXT = ('Они убили Кенни\nПритворись ноликом\nЭрик Картман\n')
+    TEXT = ('*** Пасхалки ***\n🔸 Они убили Кенни\n🔸 Притворись ноликом\n'
+            '🔸 Эрик Картман\n🔸 Марклар')
     context.bot.send_message(chat_id=chat.id, text=TEXT)
 
 
@@ -411,45 +419,56 @@ def main():
         MessageHandler(Filters.regex('Очень смешно 😤'), no_funny_answer)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такой Кэп'), who_is_kep4ik)
+        MessageHandler(Filters.regex(r'^Кто такой Кэп\??$'), who_is_kep4ik)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такой Создатель'), who_is_creator)
+        MessageHandler(
+            Filters.regex(r'^Кто такой Создатель\??$'), who_is_creator
+        )
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такая Няшка'), who_is_inna)
+        MessageHandler(Filters.regex(r'^Кто такая Няшка\??$'), who_is_inna)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такая Лемур'), who_is_natasha)
+        MessageHandler(Filters.regex(r'^Кто такая Лемур\??$'), who_is_natasha)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такой Зажа'), who_is_zaja)
+        MessageHandler(Filters.regex(r'^Кто такой Зажа\??$'), who_is_zaja)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такой Марик'), who_is_marik)
+        MessageHandler(Filters.regex(r'^Кто такой Марик\??$'), who_is_marik)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Кто такая Маришка'), who_is_marishka)
+        MessageHandler(
+            Filters.regex(r'^Кто такая Маришка\??$'), who_is_marishka
+        )
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'Кто так.. \D+'), who_is_unknown)
+        MessageHandler(
+            Filters.regex(r'^Кто так(ой|ая) [А-ю]{3,20}\??$'), who_is_unknown
+        )
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'^Фалафель$'), secret_dossier)
+        MessageHandler(Filters.regex('^Фалафель$'), secret_dossier)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'Они убили Кен+и'), they_killed_kenny)
+        MessageHandler(Filters.regex('^Они убили Кен+и!?$'), they_killed_kenny)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'Эрик\D? Картман\D?'), eric_cartman)
+        MessageHandler(Filters.regex('Эрик[ае]? Картман[ае]?'), eric_cartman)
     )
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'Притворись ноликом'), pretend_zero)
+        MessageHandler(
+            Filters.regex('[Пп]ритвор[ия](сь|ть?ся) ноликом'), pretend_zero
+        )
     )
-    # Обработчик будет перехватывать все текстовые сообщения,
-    # кроме команд: "& (~Filters.command)"
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.text & (~Filters.command), default_answer)
+        MessageHandler(Filters.regex('Марклар'), marklar)
+    )
+    # Обработчик будет перехватывать все текстовые сообщения, кроме команд:
+    # "& ~Filters.command"
+    updater.dispatcher.add_handler(
+        MessageHandler(Filters.text & ~Filters.command, default_answer)
     )
     updater.dispatcher.add_handler(CommandHandler('hidden', hidden_phrases))
     updater.start_polling()
