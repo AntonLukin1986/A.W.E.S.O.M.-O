@@ -10,24 +10,27 @@ from telegram import Bot, ReplyKeyboardMarkup
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 import requests
 
-from text_for_bot import (
-    AWESOM_O_STORY, SONG_1, SONG_2, SONG_3, SONG_4, SONG_5, SONG_6, WHO_IS_KEP,
-    WHO_IS_CREATOR, WHO_IS_INNA, WHO_IS_NATASHA, WHO_IS_ZAJA, WHO_IS_MARIK,
-    WHO_IS_MARISHKA, SHOW_CAT_TEXT, DOSSIER_TEXT, SOME_SONG_TEXT,
-    MARKLAR_ANSWER
-)
+import text_for_bot as txt
 
 load_dotenv()
 token = os.getenv('AWESOM_O_TOKEN')
 bot = Bot(token=token)
 
-CAT_BUTTON = 'Котика хочу 🐈'
-ANECDOTE_BUTTON = 'Расскажи анекдот 😃'
-SONG_BUTTON = 'Спой песенку 🎤'
-WHAT_ARE_YOU_BUTTON = 'Да что ты такое 🤨'
-PETTING_BUTTON = 'Давай поглажу 🤗'
-STRANGE_NAME_BUTTON = 'Странное у тебя имя 🤔'
-HAVE_MERCY_BUTTON = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
+CAT_BTN = 'Котика хочу 🐈'
+ANECDOTE_BTN = 'Расскажи анекдот 😃'
+SONG_BTN = 'Спой песенку 🎤'
+WHAT_ARE_YOU_BTN = 'Да что ты такое 🤨'
+PETTING_BTN = 'Давай поглажу 🤗'
+STRANGE_NAME_BTN = 'Странное у тебя имя 🤔'
+HAVE_MERCY_BTN = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
+SO_SO_BTN = 'Ну, такое себе 🙄'
+BRAVO_BTN = 'Браво! Это гениально 🤣'
+KOMBIKORM_BTN = 'Комбикорм! Ммм... Вкуснятина 😋'
+NO_FUNNY_BTN = 'Очень смешно 😤'
+HANDS_UP_BTN = 'Я вообще Руки Вверх люблю 🙃'
+MORE_TALANTS_BTN = 'А какие у тебя ещё таланты? 😏'
+SURPRISE_ME = 'А ну-ка, удиви! 😐'
+NEXT_TIME = 'Давай в другой раз 😏'
 
 
 def wake_up(update, context):
@@ -35,7 +38,7 @@ def wake_up(update, context):
     chat = update.effective_chat
     name = update.message.chat.first_name
     button = ReplyKeyboardMarkup(
-        [[PETTING_BUTTON]],
+        [[PETTING_BTN]],
         resize_keyboard=True
     )
     TEXT = (f'Привет, {name}! Я робот Ш.И.К.А.Р.Н.-О четыре тысячи 🤖',
@@ -52,7 +55,7 @@ def stop_petting(update, context):
     TEXT = ('Ш.И.К.А.Р.Н.-О нравится.', 'Ш.И.К.А.Р.Н.-О хорошо.',
             'Продолжай', '...', 'Хватит тро-гать мою ба-тарейку!')
     button = ReplyKeyboardMarkup(
-        [[STRANGE_NAME_BUTTON]],
+        [[STRANGE_NAME_BTN]],
         resize_keyboard=True
     )
     for text in TEXT:
@@ -68,8 +71,8 @@ def strange_name(update, context):
             'будет грустным пандой 🐼\nhttp://online-south-park.ru/season-8/'
             '130-8-sezon-2-seriya-shikarn-o.html')
     button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
         resize_keyboard=True
     )
     context.bot.send_message(chat.id, TEXT, reply_markup=button)
@@ -115,29 +118,84 @@ def show_cat_picture(update, context):
     time.sleep(2)
     context.bot.send_photo(chat.id, get_new_image(update, context))
     time.sleep(2)
-    context.bot.send_message(chat.id, random.choice(SHOW_CAT_TEXT))
+    context.bot.send_message(chat.id, random.choice(txt.SHOW_CAT_TEXT))
 
 
 def secret_dossier(update, context):
     """Ответ бота на слово "Фалафель"."""
     chat = update.effective_chat
-    for text in DOSSIER_TEXT:
+    for text in txt.DOSSIER_TEXT:
         context.bot.send_message(chat.id, text)
         time.sleep(2)
 
 
 def some_song(update, context):
     """Ответ бота на нажатие кнопки "Спой песенку 🎤"."""
-    SONG = random.choice((SONG_1, SONG_2, SONG_3, SONG_4, SONG_5, SONG_6))
+    SONG = random.choice([txt.SONG_1, txt.SONG_2, txt.SONG_3,
+                          txt.SONG_4, txt.SONG_5, txt.SONG_6])
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        [[HANDS_UP_BTN], [MORE_TALANTS_BTN]],
         resize_keyboard=True
     )
     context.bot.send_message(chat_id=chat.id, text=SONG, reply_markup=button)
     time.sleep(2)
-    context.bot.send_message(chat.id, random.choice(SOME_SONG_TEXT))
+    context.bot.send_message(chat.id, random.choice(txt.SOME_SONG_TEXT))
+
+
+def nogu_svelo(update, context):
+    """Ответ бота на нажатие кнопки "Я вообще Руки Вверх люблю 🙌"."""
+    chat = update.effective_chat
+    button = ReplyKeyboardMarkup(
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
+        resize_keyboard=True
+    )
+    context.bot.send_message(
+        chat_id=chat.id,
+        text='Хорошо хоть не Ногу Свело 🤪',
+        reply_markup=button
+    )
+
+
+def talants(update, context):
+    """Ответ бота на нажатие кнопки "А какие у тебя ещё таланты? 😏"."""
+    chat = update.effective_chat
+    button = ReplyKeyboardMarkup(
+        [[SURPRISE_ME], [NEXT_TIME]],
+        resize_keyboard=True
+    )
+    context.bot.send_message(
+        chat_id=chat.id,
+        text='Силой электронно-вычислитель-ной мысли могу угадать, '
+             'когда у тебя день ро-ждения 🧙🏻',
+        reply_markup=button
+    )
+
+
+def birthday_predict(update, context):
+    """Ответ бота на нажатие кнопки "А ну-ка, удиви! 😐"."""
+    # организовать изолированную ветку
+'''
+УГАДЫВАНИЕ ДАТЫ И МЕСЯЦА РОЖДЕНИЯ
+Пусть собеседник умножит число своего рождения на 2, прибавит 5, умножит на 50 и прибавит порядковый номер месяца.
+Вы спросите результат и сами отнимите от него 250 и получите день рождения и месяц.
+'''
+
+
+def next_time(update, context):
+    """Ответ бота на нажатие кнопки "Давай в другой раз 😏"."""
+    chat = update.effective_chat
+    button = ReplyKeyboardMarkup(
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
+        resize_keyboard=True
+    )
+    context.bot.send_message(
+        chat_id=chat.id,
+        text='Хорошо хоть не Ногу Свело 🤪',
+        reply_markup=button
+    )
 
 
 def show_anecdote(update, context):
@@ -151,8 +209,8 @@ def show_anecdote(update, context):
         text = ('Долбанные вышки 5G. Они жгут мои микросхемы 😕\n'
                 'Расскажу в следующий раз...')
         button = ReplyKeyboardMarkup(
-            [[CAT_BUTTON, ANECDOTE_BUTTON],
-             [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+            [[CAT_BTN, ANECDOTE_BTN],
+             [SONG_BTN, WHAT_ARE_YOU_BTN]],
             resize_keyboard=True
         )
         context.bot.send_message(chat.id, text, reply_markup=button)
@@ -177,8 +235,8 @@ def no_humor_sence(update, context):
     """Ответ бота на нажатие кнопки "Ну такое себе 🤨"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
         resize_keyboard=True
     )
     TEXT = ('У тебя просто нет чу-вства юмора 😤', 'До тебя просто дол-го доход'
@@ -194,8 +252,8 @@ def bravo(update, context):
     """Ответ бота на нажатие кнопки "Браво! Это гениально 🤣"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
         resize_keyboard=True
     )
     TEXT = ('Молодец! Возьми с полки пиро-жок 🥯', 'Ещё бы! Я учил-ся у самого '
@@ -211,10 +269,10 @@ def what_are_you(update, context):
     """Ответ бота на нажатие кнопки "Да что ты такое 🤨"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
-        [[HAVE_MERCY_BUTTON]],
+        [[HAVE_MERCY_BTN]],
         resize_keyboard=True
     )
-    for text in AWESOM_O_STORY:
+    for text in txt.AWESOM_O_STORY:
         context.bot.send_message(chat.id, text, reply_markup=button)
         time.sleep(2)
 
@@ -223,8 +281,7 @@ def have_mercy_answer(update, context):
     """Ответ бота на нажатие кнопки "О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏"."""
     chat = update.effective_chat
     button = ReplyKeyboardMarkup(
-        [['Комбикорм! Ммм... Вкуснятина 😋'],
-         ['Очень смешно 😤']],
+        [[KOMBIKORM_BTN], [NO_FUNNY_BTN]],
         resize_keyboard=True
     )
     context.bot.send_message(
@@ -244,8 +301,8 @@ def no_funny_answer(update, context):
             'ужин.\nСобираюсь при-готовить пасту 🍝\n',
             'Вот только не знаю, какую: Colgate или Lacalut... 🤔')
     button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
         resize_keyboard=True
     )
     for text in TEXT:
@@ -260,8 +317,8 @@ def kombikorm_answer(update, context):
             '-мал сервер ЦэРэУ.\nЗагруже-ны секретные данные. Доступ по тре-'
             'бованию.\nКод доступа:\n➡️ Фалафель ⬅️ 👀')
     button = ReplyKeyboardMarkup(
-        [[CAT_BUTTON, ANECDOTE_BUTTON],
-         [SONG_BUTTON, WHAT_ARE_YOU_BUTTON]],
+        [[CAT_BTN, ANECDOTE_BTN],
+         [SONG_BTN, WHAT_ARE_YOU_BTN]],
         resize_keyboard=True
     )
     for text in TEXT:
@@ -272,7 +329,7 @@ def kombikorm_answer(update, context):
 def who_is_creator(update, context):
     """Ответ бота на вопрос "Кто такой Создатель?"."""
     chat = update.effective_chat
-    for text in WHO_IS_CREATOR:
+    for text in txt.WHO_IS_CREATOR:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -280,7 +337,7 @@ def who_is_creator(update, context):
 def who_is_kep4ik(update, context):
     """Ответ бота на вопрос "Кто такой Кэп?"."""
     chat = update.effective_chat
-    for text in WHO_IS_KEP:
+    for text in txt.WHO_IS_KEP:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -288,7 +345,7 @@ def who_is_kep4ik(update, context):
 def who_is_inna(update, context):
     """Ответ бота на вопрос "Кто такая Няшка?"."""
     chat = update.effective_chat
-    for text in WHO_IS_INNA:
+    for text in txt.WHO_IS_INNA:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -296,7 +353,7 @@ def who_is_inna(update, context):
 def who_is_natasha(update, context):
     """Ответ бота на вопрос "Кто такая Лемур?"."""
     chat = update.effective_chat
-    for text in WHO_IS_NATASHA:
+    for text in txt.WHO_IS_NATASHA:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -304,7 +361,7 @@ def who_is_natasha(update, context):
 def who_is_zaja(update, context):
     """Ответ бота на вопрос "Кто такой Зажа?"."""
     chat = update.effective_chat
-    for text in WHO_IS_ZAJA:
+    for text in txt.WHO_IS_ZAJA:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -312,7 +369,7 @@ def who_is_zaja(update, context):
 def who_is_marik(update, context):
     """Ответ бота на вопрос "Кто такой Марик?"."""
     chat = update.effective_chat
-    for text in WHO_IS_MARIK:
+    for text in txt.WHO_IS_MARIK:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -320,7 +377,7 @@ def who_is_marik(update, context):
 def who_is_marishka(update, context):
     """Ответ бота на вопрос "Кто такая Маришка?"."""
     chat = update.effective_chat
-    for text in WHO_IS_MARISHKA:
+    for text in txt.WHO_IS_MARISHKA:
         context.bot.send_message(chat_id=chat.id, text=text)
         time.sleep(2)
 
@@ -368,7 +425,7 @@ def pretend_zero(update, context):
 def marklar(update, context):
     """Ответ бота на сообщение "Марклар"."""
     chat = update.effective_chat
-    context.bot.send_message(chat_id=chat.id, text=MARKLAR_ANSWER)
+    context.bot.send_message(chat_id=chat.id, text=txt.MARKLAR_ANSWER)
 
 
 def hidden_phrases(update, context):
@@ -384,108 +441,85 @@ def main():
     updater = Updater(token=token)
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(PETTING_BUTTON), stop_petting)
-    )
+        MessageHandler(Filters.regex(PETTING_BTN), stop_petting))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(STRANGE_NAME_BUTTON), strange_name)
-    )
+        MessageHandler(Filters.regex(STRANGE_NAME_BTN), strange_name))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(CAT_BUTTON), show_cat_picture)
-    )
+        MessageHandler(Filters.regex(CAT_BTN), show_cat_picture))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(ANECDOTE_BUTTON), show_anecdote)
-    )
+        MessageHandler(Filters.regex(ANECDOTE_BTN), show_anecdote))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Ну, такое себе 🙄'), no_humor_sence)
-    )
+        MessageHandler(Filters.regex(SO_SO_BTN), no_humor_sence))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Браво! Это гениально 🤣'), bravo)
-    )
+        MessageHandler(Filters.regex(BRAVO_BTN), bravo))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(SONG_BUTTON), some_song)
-    )
+        MessageHandler(Filters.regex(SONG_BTN), some_song))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(WHAT_ARE_YOU_BUTTON), what_are_you)
-    )
+        MessageHandler(Filters.regex(HANDS_UP_BTN), nogu_svelo))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(HAVE_MERCY_BUTTON), have_mercy_answer)
-    )
+        MessageHandler(Filters.regex(MORE_TALANTS_BTN), talants))
     updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex('Комбикорм! Ммм... Вкуснятина 😋'), kombikorm_answer
-        )
-    )
+        MessageHandler(Filters.regex(SURPRISE_ME), birthday_predict))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Очень смешно 😤'), no_funny_answer)
-    )
+        MessageHandler(Filters.regex(NEXT_TIME), next_time))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'^Кто такой Кэп\??$'), who_is_kep4ik)
-    )
+        MessageHandler(Filters.regex(WHAT_ARE_YOU_BTN), what_are_you))
+    updater.dispatcher.add_handler(
+        MessageHandler(Filters.regex(HAVE_MERCY_BTN), have_mercy_answer))
+    updater.dispatcher.add_handler(
+        MessageHandler(Filters.regex(KOMBIKORM_BTN), kombikorm_answer))
+    updater.dispatcher.add_handler(
+        MessageHandler(Filters.regex(NO_FUNNY_BTN), no_funny_answer))
+    updater.dispatcher.add_handler(
+        MessageHandler(Filters.regex(r'^Кто такой Кэп\??$'), who_is_kep4ik))
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(r'^Кто такой Создатель\??$'), who_is_creator
-        )
-    )
+            Filters.regex(r'^Кто такой Создатель\??$'), who_is_creator))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'^Кто такая Няшка\??$'), who_is_inna)
-    )
+        MessageHandler(Filters.regex(r'^Кто такая Няшка\??$'), who_is_inna))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'^Кто такая Лемур\??$'), who_is_natasha)
-    )
+        MessageHandler(Filters.regex(r'^Кто такая Лемур\??$'), who_is_natasha))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'^Кто такой Зажа\??$'), who_is_zaja)
-    )
+        MessageHandler(Filters.regex(r'^Кто такой Зажа\??$'), who_is_zaja))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex(r'^Кто такой Марик\??$'), who_is_marik)
-    )
+        MessageHandler(Filters.regex(r'^Кто такой Марик\??$'), who_is_marik))
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(r'^Кто такая Маришка\??$'), who_is_marishka
-        )
-    )
+            Filters.regex(r'^Кто такая Маришка\??$'), who_is_marishka))
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(r'^Кто так(ой|ая) [А-ю]{3,20}\??$'), who_is_unknown
-        )
-    )
+            Filters.regex(r'^Кто так(ой|ая) [А-ю]{3,20}\??$'), who_is_unknown))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('^Фалафель$'), secret_dossier)
-    )
+        MessageHandler(Filters.regex('^Фалафель$'), secret_dossier))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('^Они убили Кен+и!?$'), they_killed_kenny)
-    )
+        MessageHandler(Filters.regex('^Они убили Кен+и$'), they_killed_kenny))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Эрик[ае]? Картман[ае]?'), eric_cartman)
-    )
+        MessageHandler(Filters.regex('Эрик[ае]? Картман[ае]?'), eric_cartman))
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex('[Пп]ритвор[ия](сь|ть?ся) ноликом'), pretend_zero
-        )
-    )
+            Filters.regex('[Пп]ритвор[ия](сь|ть?ся) ноликом'), pretend_zero))
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.regex('Марклар'), marklar)
-    )
+        MessageHandler(Filters.regex('Марклар'), marklar))
     # Обработчик будет перехватывать все текстовые сообщения, кроме команд:
-    # "& ~Filters.command"
     updater.dispatcher.add_handler(
-        MessageHandler(Filters.text & ~Filters.command, default_answer)
-    )
-    updater.dispatcher.add_handler(CommandHandler('hidden', hidden_phrases))
+        MessageHandler(Filters.text & ~Filters.command, default_answer))
+    updater.dispatcher.add_handler(
+        CommandHandler('hidden', hidden_phrases))
     updater.start_polling()
     updater.idle()
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s, %(levelname)s, %(message)s, '
-               '%(funcName)s, %(lineno)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.handlers.RotatingFileHandler(
-                __file__ + '.log', maxBytes=2100000,
-                backupCount=2, encoding='utf-8'
-            )
-        ]
-    )
+    # logging.basicConfig(
+    #     level=logging.DEBUG,
+    #     format='%(asctime)s, %(levelname)s, %(message)s, '
+    #            '%(funcName)s, %(lineno)s',
+    #     handlers=[
+    #         logging.StreamHandler(),
+    #         logging.handlers.RotatingFileHandler(
+    #             __file__ + '.log', maxBytes=2100000,
+    #             backupCount=2, encoding='utf-8'
+    #         )
+    #     ]
+    # )
     main()
