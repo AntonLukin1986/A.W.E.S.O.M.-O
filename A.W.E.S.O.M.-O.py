@@ -438,18 +438,9 @@ def who_is_marishka(update, _):
         time.sleep(2)
 
 
-def who_is_unknown_or_bad_command(update, _):
-    """Ответ бота на вопрос "Кто такой(ая) ...?" с неизвестным человеком.
-    А также реакция на несуществующую команду."""
-    if re.match(UNKNOWN, update.message.text):
-        TEXT = ('Минуту. Осу-ществля-ю поиск в ба-зе данных... 👨🏻‍💻\n',
-                'Ошиб-ка! Такой персонаж мне не из-вестен ❌\n'
-                'Возможно, поз-же загружу обновле-ния. Но это не точно!')
-        for text in TEXT:
-            update.message.reply_text(text=text)
-            time.sleep(2)
-    else:
-        update.message.reply_text(text='Несуществующая команда 🚫')
+def bad_command(update, _):
+    """Стандартный ответ в режиме диалога Фалафель."""
+    update.message.reply_text(text='Несуществующая команда 🚫')
 
 
 def they_killed_kenny(update, _):
@@ -487,16 +478,15 @@ def main():
     handler = updater.dispatcher.add_handler
     handler(CommandHandler('start', wake_up))
     birthday_сonversation = ConversationHandler(
-        entry_points=[
-            MessageHandler(Filters.regex(SURPRISE_ME), birthday_init)],
+        entry_points=[MessageHandler(Filters.regex(SURPRISE_ME), birthday_init)],
         states={
-            BIRTH_1: [MessageHandler(Filters.regex('(' + STUPID_BTN + '|' + NOT_STUPID_BTN + ')'), cancel_or_birthday_1)],
-            BIRTH_2: [MessageHandler(Filters.regex('(' + DONE_NEXT_BTN + '|' + r'^\d{1,2}$' + ')'), birthday_2)],
-            BIRTH_3: [MessageHandler(Filters.regex('(' + MATH_BAD_BTN + '|' + r'^\d{3,4}$' + ')'), birthday_3)],
+            BIRTH_1: [MessageHandler(Filters.regex(STUPID_BTN + '|' + NOT_STUPID_BTN), cancel_or_birthday_1)],
+            BIRTH_2: [MessageHandler(Filters.regex(DONE_NEXT_BTN + '|' + r'^\d{1,2}$'), birthday_2)],
+            BIRTH_3: [MessageHandler(Filters.regex(MATH_BAD_BTN + '|' + r'^\d{3,4}$'), birthday_3)],
             BIRTH_4: [MessageHandler(Filters.regex(r'^\d{3,4}$'), birthday_4)],
-            BIRTH_5: [MessageHandler(Filters.regex('(' + NOT_MY_BIRTH_BTN + '|' + EXTRASENS_BTN + ')'), birthday_finish)],
+            BIRTH_5: [MessageHandler(Filters.regex(NOT_MY_BIRTH_BTN + '|' + EXTRASENS_BTN), birthday_finish)],
         },
-        fallbacks=[MessageHandler(Filters.text, birth_fallback)]
+        fallbacks=[MessageHandler(Filters.all, birth_fallback)]
     )
     handler(birthday_сonversation)
     falafel_сonversation = ConversationHandler(
@@ -511,25 +501,25 @@ def main():
                       MessageHandler(Filters.regex(MARINA), who_is_marishka),
                       MessageHandler(Filters.regex(RED_BTN), cancel_secret_dossier)],
         },
-        fallbacks=[MessageHandler(Filters.regex('(' + UNKNOWN + '|' + '.+' + ')'), who_is_unknown_or_bad_command)]
+        fallbacks=[MessageHandler(Filters.all, bad_command)]
     )
     handler(falafel_сonversation)
     handler(MessageHandler(Filters.regex(PETTING_BTN), stop_petting))
     handler(MessageHandler(Filters.regex(STRANGE_NAME_BTN), strange_name))
     handler(MessageHandler(Filters.regex(CAT_BTN), show_cat_picture))
     handler(MessageHandler(Filters.regex(ANECDOTE_BTN), show_anecdote))
-    handler(MessageHandler(Filters.regex('(' + SO_SO_BTN + '|' + BRAVO_BTN + ')'), bravo_or_so_so))
+    handler(MessageHandler(Filters.regex(SO_SO_BTN + '|' + BRAVO_BTN), bravo_or_so_so))
     handler(MessageHandler(Filters.regex(SONG_BTN), some_song))
-    handler(MessageHandler(Filters.regex('(' + HANDS_UP_BTN + '|' + MORE_TALANTS_BTN + ')'), song_reaction))
+    handler(MessageHandler(Filters.regex(HANDS_UP_BTN + '|' + MORE_TALANTS_BTN), song_reaction))
     handler(MessageHandler(Filters.regex(WHAT_ARE_YOU_BTN), what_are_you))
     handler(MessageHandler(Filters.regex(HAVE_MERCY_BTN), have_mercy_answer))
-    handler(MessageHandler(Filters.regex('(' + KOMBIKORM_BTN + '|' + NO_FUNNY_BTN + ')'), no_funny_or_kombikorm))
+    handler(MessageHandler(Filters.regex(KOMBIKORM_BTN + '|' + NO_FUNNY_BTN), no_funny_or_kombikorm))
     handler(MessageHandler(Filters.regex(KENNY), they_killed_kenny))
     handler(MessageHandler(Filters.regex(CARTMAN), eric_cartman))
     handler(MessageHandler(Filters.regex(ZERO), pretend_zero))
     handler(MessageHandler(Filters.regex('Марклар'), marklar))
     # Обработчик будет перехватывать все текстовые сообщения, кроме команд:
-    handler(MessageHandler(Filters.text & ~Filters.command, default_answer))
+    handler(MessageHandler(Filters.all & ~Filters.command, default_answer))
     handler(CommandHandler('hidden', hidden_phrases))
     updater.start_polling()
     updater.idle()
