@@ -1,0 +1,54 @@
+2022-02-17 19:13:38,033, DEBUG, Setting singleton dispatcher as <telegram.ext.dispatcher.Dispatcher object at 0x000002B5B6F43E10>, _set_singleton, 340
+2022-02-17 19:13:38,040, INFO, Scheduler started, start, 166
+2022-02-17 19:13:38,041, DEBUG, Looking for jobs to run, _process_jobs, 940
+2022-02-17 19:13:38,041, DEBUG, Entering: get_me, decorator, 129
+2022-02-17 19:13:38,042, DEBUG, No jobs; waiting until a job is added, _process_jobs, 1016
+2022-02-17 19:13:38,275, DEBUG, {'is_bot': True, 'can_join_groups': True, 'supports_inline_queries': False, 'first_name': 'Ш.И.К.А.Р.Н.-О', 'id': 5049099633, 'can_read_all_group_messages': False, 'username': 'AWESOME_4000_bot'}, decorator, 131
+2022-02-17 19:13:38,291, DEBUG, Exiting: get_me, decorator, 132
+2022-02-17 19:13:38,292, DEBUG, Bot:5049099633:dispatcher - started, _thread_wrapper, 351
+2022-02-17 19:13:38,293, DEBUG, Bot:5049099633:updater - started, _thread_wrapper, 351
+2022-02-17 19:13:38,293, DEBUG, Waiting for Dispatcher and polling to start, start_polling, 435
+2022-02-17 19:13:38,295, DEBUG, Updater thread started (polling), _start_polling, 585
+2022-02-17 19:13:38,296, DEBUG, Dispatcher started, start, 466
+2022-02-17 19:13:38,296, DEBUG, Start network loop retry bootstrap del webhook, _network_loop_retry, 642
+2022-02-17 19:13:38,297, DEBUG, Deleting webhook, bootstrap_del_webhook, 760
+2022-02-17 19:13:38,298, DEBUG, Entering: delete_webhook, decorator, 129
+2022-02-17 19:13:38,372, DEBUG, True, decorator, 131
+2022-02-17 19:13:38,373, DEBUG, Exiting: delete_webhook, decorator, 132
+2022-02-17 19:13:38,373, DEBUG, Bootstrap done, _start_polling, 594
+2022-02-17 19:13:38,373, DEBUG, Start network loop retry getting Updates, _network_loop_retry, 642
+2022-02-17 19:13:38,374, DEBUG, Entering: get_updates, decorator, 129
+2022-02-17 19:13:41,690, INFO, Received signal 2 (SIGINT), stopping..., _signal_handler, 858
+2022-02-17 19:13:41,691, INFO, Scheduler has been shut down, shutdown, 198
+2022-02-17 19:13:41,691, DEBUG, Looking for jobs to run, _process_jobs, 940
+2022-02-17 19:13:41,691, DEBUG, No jobs; waiting until a job is added, _process_jobs, 1016
+2022-02-17 19:13:41,691, DEBUG, Stopping Updater and Dispatcher..., stop, 818
+2022-02-17 19:13:41,692, DEBUG, Requesting Dispatcher to stop..., _stop_dispatcher, 843
+2022-02-17 19:13:41,896, WARNING, Exiting immediately!, _signal_handler, 869
+2022-03-31 16:28:20,141, DEBUG, Setting singleton dispatcher as <telegram.ext.dispatcher.Dispatcher object at 0x0000015D67DF1D40>, _set_singleton, 340
+2022-03-31 16:28:20,145, INFO, Scheduler started, start, 166
+2022-03-31 16:28:20,147, DEBUG, Looking for jobs to run, _process_jobs, 940
+2022-03-31 16:28:20,147, DEBUG, Entering: get_me, decorator, 129
+2022-03-31 16:28:20,147, DEBUG, No jobs; waiting until a job is added, _process_jobs, 1016
+2022-03-31 16:28:20,394, DEBUG, {'can_join_groups': True, 'first_name': 'Ш.И.К.А.Р.Н.-О', 'supports_inline_queries': False, 'can_read_all_group_messages': False, 'is_bot': True, 'id': 5049099633, 'username': 'AWESOME_4000_bot'}, decorator, 131
+2022-03-31 16:28:20,394, DEBUG, Exiting: get_me, decorator, 132
+2022-03-31 16:28:20,409, DEBUG, Bot:5049099633:dispatcher - started, _thread_wrapper, 351
+2022-03-31 16:28:20,411, DEBUG, Bot:5049099633:updater - started, _thread_wrapper, 351
+2022-03-31 16:28:20,411, DEBUG, Waiting for Dispatcher and polling to start, start_polling, 435
+2022-03-31 16:28:20,413, DEBUG, Updater thread started (polling), _start_polling, 585
+2022-03-31 16:28:20,415, DEBUG, Dispatcher started, start, 466
+2022-03-31 16:28:20,415, DEBUG, Start network loop retry bootstrap del webhook, _network_loop_retry, 642
+2022-03-31 16:28:20,416, DEBUG, Deleting webhook, bootstrap_del_webhook, 760
+2022-03-31 16:28:20,417, DEBUG, Entering: delete_webhook, decorator, 129
+2022-03-31 16:28:20,503, DEBUG, True, decorator, 131
+2022-03-31 16:28:20,503, DEBUG, Exiting: delete_webhook, decorator, 132
+2022-03-31 16:28:20,503, DEBUG, Bootstrap done, _start_polling, 594
+2022-03-31 16:28:20,516, DEBUG, Start network loop retry getting Updates, _network_loop_retry, 642
+2022-03-31 16:28:20,518, DEBUG, Entering: get_updates, decorator, 129
+2022-03-31 16:28:25,752, INFO, Received signal 2 (SIGINT), stopping..., _signal_handler, 858
+2022-03-31 16:28:25,753, INFO, Scheduler has been shut down, shutdown, 198
+2022-03-31 16:28:25,754, DEBUG, Looking for jobs to run, _process_jobs, 940
+2022-03-31 16:28:25,755, DEBUG, No jobs; waiting until a job is added, _process_jobs, 1016
+2022-03-31 16:28:25,757, DEBUG, Stopping Updater and Dispatcher..., stop, 818
+2022-03-31 16:28:25,757, DEBUG, Requesting Dispatcher to stop..., _stop_dispatcher, 843
+2022-03-31 16:28:25,926, WARNING, Exiting immediately!, _signal_handler, 869

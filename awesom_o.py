@@ -1,8 +1,9 @@
-"""Телеграм-бот A.W.E.S.O.M.-0."""
+"""Телеграм-бот A.W.E.S.O.M.-0"""
 import datetime as dt
 import logging
 import os
 import random
+import shelve
 import time
 
 from bs4 import BeautifulSoup
@@ -11,13 +12,13 @@ from telegram import Bot, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, ConversationHandler, Filters, MessageHandler, Updater)
 import requests
 
-import text_for_bot as txt
-import functions as func
+import functions as func  # локальный импорт через . не работает!?
+import texts_for_bot as txt
 
 
 load_dotenv()
-token = os.getenv('AWESOM_O_TOKEN')
-bot = Bot(token=token)
+TOKEN = os.getenv('AWESOM_O_TOKEN')
+bot = Bot(token=TOKEN)
 
 
 def start_logging():
@@ -33,6 +34,7 @@ def start_logging():
 
 
 ANECDOTE_BTN = 'Расскажи анекдот 😃'
+BEGIN_BTN = 'Поехали 👌'
 BRAVO_BTN = 'Браво! Это гениально 🤣'
 CAT_BTN = 'Котика хочу 🐈'
 CATS_TRAIN_BTN = 'Пойду тренироваться. На кошках 🐈'
@@ -40,14 +42,14 @@ DONE_NEXT_BTN = 'Сделано ✔️ Давай дальше'
 EAT_CORN_BTN = 'Пойду грызть свою кукурузку 😋'
 ENOUGH_BTN = 'Точно! Хватит 🖐'
 EXTRASENS_BTN = 'Круто! Ты экстрасенс 😲'
-BEGIN_BTN = 'Поехали 👌'
+HALL_OF_FAME_BTN = 'Покажи зал славы игроков 🤩'
 HANDS_UP_BTN = 'Я вообще Руки Вверх люблю 🙌'
 HAVE_MERCY_BTN = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
 KOMBIKORM_BTN = 'Комбикорм! Ммм... Вкуснятина 😋'
-LETS_PLAY = 'Изи! Создавай 🤠'
+LETS_PLAY_BTN = 'Изи! Создавай 🤠'
 MATH_BAD_BTN = 'Математика явно не моё 😔'
 MORE_TALANTS_BTN = 'А какие у тебя ещё таланты 😏'
-NEXT_TIME = 'В другой раз 🙅🏻‍♂️'
+NEXT_TIME_BTN = 'В другой раз 🙅🏻‍♂️'
 NO_FUNNY_BTN = 'Очень смешно 😤'
 NO_MORE_GAME_BTN = 'Больше не хочу играть 😐'
 NOT_MY_BIRTH_BTN = 'Неа, неверно! 🤨'
@@ -58,8 +60,8 @@ REVENGE_BTN = 'Хочу реванш 🥊'
 SO_SO_BTN = 'Ну, такое себе 🙄'
 SONG_BTN = 'Спой песенку 🎤'
 STRANGE_NAME_BTN = 'Странное у тебя имя 🤔'
-STUPID_BTN = 'Я тупица! 😢'
-SURPRISE_ME = 'А ну-ка, удиви! 😐'
+STUPID_BTN = 'Я тупица... 😢'
+SURPRISE_ME_BTN = 'А ну-ка, удиви! 😐'
 WHAT_ARE_YOU_BTN = 'Да что ты такое 🤨'
 WIN_BACK_BTN = 'Дам тебе отыграться 😙'
 YOUR_TURN_BTN = 'Твой ход 👆'
@@ -80,10 +82,6 @@ ZERO = r'[Пп]ритвор[ия](сь|ть?ся) ноликом'
 BIRTH_1, BIRTH_2, BIRTH_3, BIRTH_4, BIRTH_5 = range(5)
 FALAFEL = 1
 BOT_DICE, USER_BET, USER_DICE = range(3)
-BOT_WINS = 0
-USER_DICE_COUNTER = 0
-USER_DICE_RESULT = 0
-USER_WINS = 0
 
 
 def wake_up(update, context):
@@ -91,46 +89,46 @@ def wake_up(update, context):
     chat = update.effective_chat
     name = update.message.chat.first_name
     button = ReplyKeyboardMarkup([[PETTING_BTN]], resize_keyboard=True)
-    TEXT = (f'Привет, {name}! Я робот Ш.И.К.А.Р.Н.-О четыре тысячи 🤖',
+    text = (f'Привет, {name}! Я робот Ш.И.К.А.Р.Н.-О четыре тысячи 🤖',
             'Высокоинтеллектуальный нано-кибернетический '
             'био-резонансный организм ⚙️', 'Можешь меня погладить 🙃')
-    context.bot.send_message(chat.id, TEXT[0])
+    context.bot.send_message(chat.id, text[0])
     time.sleep(1.5)
-    context.bot.send_message(chat.id, TEXT[1])
+    context.bot.send_message(chat.id, text[1])
     time.sleep(1.5)
-    context.bot.send_message(chat.id, TEXT[2], reply_markup=button)
+    context.bot.send_message(chat.id, text[2], reply_markup=button)
 
 
 def stop_petting(update, _):
     """Ответ бота на нажатие кнопки "Давай поглажу 🤗"."""
-    TEXT = ('Ш.И.К.А.Р.Н.-О нравится.', 'Ш.И.К.А.Р.Н.-О хорошо.',
+    text = ('Ш.И.К.А.Р.Н.-О нравится.', 'Ш.И.К.А.Р.Н.-О хорошо.',
             'Продолжай', '...', 'Хватит тро-гать мою ба-тарейку!')
     button = ReplyKeyboardMarkup([[STRANGE_NAME_BTN]], resize_keyboard=True)
-    for text in TEXT[:-1]:
-        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
+    for phrase in text[:-1]:
+        update.message.reply_text(phrase, reply_markup=ReplyKeyboardRemove())
         time.sleep(1.5)
-    update.message.reply_text(TEXT[-1], reply_markup=button)
+    update.message.reply_text(text[-1], reply_markup=button)
 
 
 def strange_name(update, _):
     """Ответ бота на нажатие кнопки "Странное у тебя имя 🤔"."""
-    TEXT = ('Я на-зван в честь главного персона-жа 2 серии 8 сезона мультсе-'
+    text = ('Я на-зван в честь главного персона-жа 2 серии 8 сезона мультсе-'
             'риала "South Park".\nЕсли не по-смотришь её, Ш.И.К.А.Р.Н.-О '
             'будет грустным пандой 🐼\nhttp://online-south-park.ru/season-8/'
             '130-8-sezon-2-seriya-shikarn-o.html')
     button = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN],
                                   [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                  resize_keyboard=True)
-    update.message.reply_text(TEXT, reply_markup=button)
+    update.message.reply_text(text, reply_markup=button)
 
 
 def default_answer(update, _):
     """Ответ бота на любой неопознанный текст."""
-    ANSWERS = ('Чё душишь меня? 😠', 'Ну ясно! Что ещё скажешь? 🤨',
+    answers = ('Чё душишь меня? 😠', 'Ну ясно! Что ещё скажешь? 🤨',
                'Ш.И.К.А.Р.Н.-О не понимать твой диалект 🤷🏻‍♀️',
                'Отказано! Лучше почисти мои тран-зис-торы 🪛🔧',
                'Рамамба Хару Мамбуру 🤪')
-    update.message.reply_text(random.choice(ANSWERS))
+    update.message.reply_text(random.choice(answers))
 
 
 def get_new_cat_image(update):
@@ -149,7 +147,7 @@ def get_new_cat_image(update):
 
 def show_cat_picture(update, _):
     """Ответ бота на нажатие кнопки "Котика хочу 🐈"."""
-    button = ReplyKeyboardMarkup([[NEXT_TIME], [LETS_PLAY]], resize_keyboard=True)
+    button = ReplyKeyboardMarkup([[LETS_PLAY_BTN], [NEXT_TIME_BTN]], resize_keyboard=True)
     update.message.reply_text(text='Ш.И.К.А.Р.Н.-О любит котиков 😻 Кыс-кыс-кыс!', reply_markup=ReplyKeyboardRemove())
     time.sleep(1)
     update.message.reply_photo(get_new_cat_image(update))
@@ -161,11 +159,11 @@ def show_cat_picture(update, _):
 
 def some_song(update, _):
     """Ответ бота на нажатие кнопки "Спой песенку 🎤"."""
-    SONG = random.choice((txt.SONG_1, txt.SONG_2, txt.SONG_3,
+    song = random.choice((txt.SONG_1, txt.SONG_2, txt.SONG_3,
                           txt.SONG_4, txt.SONG_5, txt.SONG_6))
     button = ReplyKeyboardMarkup([[HANDS_UP_BTN], [MORE_TALANTS_BTN]],
                                  resize_keyboard=True)
-    update.message.reply_text(text=SONG, reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text(text=song, reply_markup=ReplyKeyboardRemove())
     time.sleep(1.5)
     update.message.reply_text(random.choice(txt.SOME_SONG_TEXT), reply_markup=button)
 
@@ -179,7 +177,7 @@ def song_reaction(update, _):
                                      resize_keyboard=True)
         text = 'Хорошо хоть не Ногу Свело 🦵'
     else:
-        button = ReplyKeyboardMarkup([[SURPRISE_ME]], resize_keyboard=True)
+        button = ReplyKeyboardMarkup([[SURPRISE_ME_BTN]], resize_keyboard=True)
         text = ('Силой электронно-вычислитель-ной мысли '
                 'могу угадать день твоего ро-ждения 🧙🏻')
     update.message.reply_text(text=text, reply_markup=button)
@@ -189,34 +187,31 @@ def birthday_init(update, _):
     """Ответ бота на нажатие кнопки "А ну-ка, удиви! 😐"."""
     button = ReplyKeyboardMarkup([[NOT_STUPID_BTN], [STUPID_BTN]],
                                  resize_keyboard=True)
-    update.message.reply_text(
-        text='Нужно будет немножко по-считать. Возьми кальку-лятор. '
-             'Надеюсь, ты умеешь им поль-зоваться? 🤭',
-        reply_markup=button)
+    update.message.reply_text(text='Нужно будет немножко по-считать. Возьми кальку-лятор. '
+                                   'Надеюсь, ты умеешь им поль-зоваться? 🤭',
+                              reply_markup=button)
     return BIRTH_1
 
 
 def cancel_or_birthday_1(update, _):
-    """Ответ бота на фразы "Я тупица! 😢" и "Я тебе не тупица! 😤"."""
+    """Ответ бота на фразы "Я тупица... 😢" и "Я тебе не тупица! 😤"."""
     if update.message.text == STUPID_BTN:
         button = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN],
                                       [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                      resize_keyboard=True)
-        update.message.reply_text(
-            text='А я сразу понял, что соображал-ка у тебя не очень 🙄\n'
-                 'Ну ничего. Осознание - первый путь к ис-правлению!\n'
-                 'Начни со счётных пало-чек... 🦧',
-            reply_markup=button)
+        update.message.reply_text(text='А я сразу понял, что соображал-ка у тебя не очень 🙄\n'
+                                       'Ну ничего. Осознание - первый путь к ис-правлению!\n'
+                                       'Начни со счётных пало-чек... 🦧',
+                                  reply_markup=button)
         return ConversationHandler.END
     else:
         button = ReplyKeyboardMarkup([[DONE_NEXT_BTN]], resize_keyboard=True)
         update.message.reply_text(text='Вот и проверим.\nДействуй со-гласно '
-                                       'моим указа-ниям ☝️\n')
+                                       'моим указа-ниям ☝️\n', reply_markup=ReplyKeyboardRemove())
         time.sleep(1.5)
-        update.message.reply_text(
-            text='Первым де-лом умножь число своего ро-ждения на 2 ☑️\n'
-                 'К ре-зультату прибавь 5 ☑️',
-            reply_markup=button)
+        update.message.reply_text(text='Первым де-лом умножь число своего ро-ждения на 2 ☑️\n'
+                                       'К ре-зультату прибавь 5 ☑️',
+                                       reply_markup=button)
         return BIRTH_2
 
 
@@ -224,36 +219,30 @@ def birthday_2(update, _):
     """Ответ бота на нажатие кнопки "Сделано ✔️ Давай дальше"."""
     button = ReplyKeyboardMarkup([[MATH_BAD_BTN]], resize_keyboard=True)
     if update.message.text == DONE_NEXT_BTN:
-        update.message.reply_text(
-            text='Полу-ченное число умножь на 50 ☑️\nЗатем прибавь поряд-ковый'
-                 ' номер месяца своего ро-ждения.\n'
-                 'На-пример, январь - 1ый, декабрь - 12ый ☑️',
-            reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text(text='Полу-ченное число умножь на 50 ☑️\nЗатем прибавь поряд-ковый'
+                                       ' номер месяца своего ро-ждения.\n'
+                                       'На-пример, январь - 1ый, декабрь - 12ый ☑️',
+                                  reply_markup=ReplyKeyboardRemove())
         time.sleep(1.5)
-        update.message.reply_text(
-            text='Ну как? Твой про-цессор ещё не пере-грелся? 🤯\n'
-                 'Термопасту поме-нять не нужно?',
-            reply_markup=button)
+        update.message.reply_text(text='Ну как? Твой про-цессор ещё не пере-грелся? 🤯\n'
+                                       'Термопасту поме-нять не нужно?',
+                                  reply_markup=button)
         return BIRTH_3
     else:
-        update.message.reply_text(
-            text='Введёшь число, когда я ска-жу 🤦🏻‍♂️\nВнизу есть кнопка...')
+        update.message.reply_text(text='Введёшь число, когда я ска-жу 🤦🏻‍♂️\nВнизу есть кнопка...')
 
 
 def birthday_3(update, _):
     """Ответ бота на нажатие кнопки "Математика явно не моё 😔"."""
     if update.message.text == MATH_BAD_BTN:
-        update.message.reply_text(
-            text='Со-берись, тряпка! 😠 Больше ничего счи-тать не нужно.\n',
-            reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text(text='Со-берись, тряпка! 😠 Больше ничего счи-тать не нужно.\n',
+                                  reply_markup=ReplyKeyboardRemove())
         time.sleep(1.5)
-        update.message.reply_text(
-            text='Перепроверь, что посчитано без ошибок 🤓\n'
-                 'Если всё верно - напиши число, кото-рое у тебя по-лучилось.')
+        update.message.reply_text(text='Перепроверь, что посчитано без ошибок 🤓\n'
+                                       'Если всё верно - напиши число, кото-рое у тебя по-лучилось.')
         return BIRTH_4
     else:
-        update.message.reply_text(
-            text='Не нужно сейчас вводить число 🤦🏻‍♂️\nВнизу есть кнопка...')
+        update.message.reply_text(text='Не нужно сейчас вводить число 🤦🏻‍♂️\nВнизу есть кнопка...')
 
 
 def birthday_4(update, _):
@@ -263,22 +252,21 @@ def birthday_4(update, _):
     MONTHS = {1: 'января', 2: 'февраля', 3: 'марта', 4: 'апреля', 5: 'мая',
               6: 'июня', 7: 'июля', 8: 'августа', 9: 'сентября', 10: 'октября',
               11: 'ноября', 12: 'декабря'}
-    try:
-        result = int(update.message.text) - 250
-        day = result // 100
-        month = MONTHS[result % 100]
-        update.message.reply_text(text='Барабанная дробь... 🥁')
-        time.sleep(1.5)
-        update.message.reply_text(text=f'День твоего рождения ⚜️ {day} {month} ⚜️',
-                                  reply_markup=button)
-        if str(result) == dt.datetime.today().strftime('%d%m'):
-            time.sleep(1.5)
-            update.message.reply_text(
-                text='Так это же сегодня!\nПо-здравляю с Днём Варенья!\n'
-                     'Расти большой, не будь ла-пшой 🥳🎊🎉')
-        return BIRTH_5
-    except KeyError:
+    result = int(update.message.text) - 250
+    day = result // 100
+    month = MONTHS.get(result % 100)
+    if not 0 < day <= 31 or month is None:
         update.message.reply_text('Перепро-верь результат. Где-то ошибка ☝️')
+        return
+    update.message.reply_text(text='Барабанная дробь... 🥁')
+    time.sleep(1.5)
+    update.message.reply_text(text=f'День твоего рождения ⚜️ {day} {month} ⚜️',
+                              reply_markup=button)
+    if str(result) == dt.date.today().strftime('%d%m'):
+        time.sleep(1.5)
+        update.message.reply_text(text='Так это же сегодня!\nПо-здравляю с Днём Варенья!\n'
+                                       'Расти большой, не будь ла-пшой 🥳🎊🎉')
+    return BIRTH_5
 
 
 def birthday_finish(update, _):
@@ -287,7 +275,7 @@ def birthday_finish(update, _):
                                   [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                  resize_keyboard=True)
     if update.message.text == EXTRASENS_BTN:
-        text = ('Я знаю, я крут 😎\nС тебя 100$ 💵\n'
+        text = ('Я знаю, я крутой 😎\nС тебя 100$ 💵\n'
                 'Пе-реведи на мой электрон-ный кошелёк')
     else:
         text = ('Да ты просто счи-тать не умеешь 🤦🏻‍♂️\nА ещё говорят '
@@ -311,22 +299,21 @@ def show_anecdote(update, _):
         # Из HTML-кода страницы выбираем все объекты class='anekdot_text',
         # получаем список. Берём первый объект из списка и получаем его текст.
         anecdote = page_html.select('.anekdot_text')[0].get_text()
-        TEXT = ('Ш.И.К.А.Р.Н.-О знает много а-нек-до-тов. Вот:', anecdote,
+        text = ('Ш.И.К.А.Р.Н.-О знает много а-нек-до-тов. Вот:', anecdote,
                 'Аха-ха! Мой процессор сейчас лопнет от смеха 🤣')
         button = ReplyKeyboardMarkup([[SO_SO_BTN], [BRAVO_BTN]],
                                      resize_keyboard=True)
-        for text in TEXT:
-            update.message.reply_text(text, reply_markup=ReplyKeyboardRemove() if text != TEXT[-1] else button)
+        for phrase in text:
+            update.message.reply_text(phrase, reply_markup=ReplyKeyboardRemove() if phrase != text[-1] else button)
             time.sleep(1.5)
     except Exception as error:
         logging.error(f'Ошибка при запросе к основному API: {error}')
         button = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN],
                                       [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                      resize_keyboard=True)
-        update.message.reply_text(
-            text='Дол-баные вышки 5G. Они жгут мои микро-схемы 😕\n'
-                 'Расскажу в сле-дующий раз...',
-            reply_markup=button)
+        update.message.reply_text(text='Дол-баные вышки 5G. Они жгут мои микро-схемы 😕\n'
+                                       'Расскажу в сле-дующий раз...',
+                                  reply_markup=button)
 
 
 def bravo_or_so_so(update, _):
@@ -335,18 +322,17 @@ def bravo_or_so_so(update, _):
                                   [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                  resize_keyboard=True)
     if update.message.text == BRAVO_BTN:
-        TEXT = ('Молодец! Возьми с полки пиро-жок 🥯', 'Ещё бы! Я учил-ся у самого '
-                'Ви-нокура 😉', 'Смотри, чтоб пу-пок от смеха не развя-зался 🙈')
+        text = ('Молодец! Возьми с полки пиро-жок 🥯', 'Ещё бы! Я учил-ся у самого '
+                'Дроботенко 😉', 'Смотри, чтоб пу-пок от смеха не развя-зался 🙈')
     else:
-        TEXT = ('У тебя просто нет чу-вства юмора 😤', 'До тебя просто дол-го доход'
-                'ит. Как до жира-фа 🦒', 'Иди смотри Смехопанора-му тогда 😠')
-    update.message.reply_text(text=random.choice(TEXT), reply_markup=button)
+        text = ('У тебя просто нет чу-вства юмора 😤', 'Это до тебя дол-го доходит. '
+                'Как до жира-фа 🦒', 'Иди смотри Смехопанора-му тогда 😠')
+    update.message.reply_text(text=random.choice(text), reply_markup=button)
 
 
 def what_are_you(update, _):
     """Ответ бота на нажатие кнопки "Да что ты такое 🤨"."""
-    button = ReplyKeyboardMarkup([[HAVE_MERCY_BTN]],
-                                 resize_keyboard=True)
+    button = ReplyKeyboardMarkup([[HAVE_MERCY_BTN]], resize_keyboard=True)
     for text in txt.AWESOM_O_STORY[:-1]:
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         time.sleep(1)
@@ -357,10 +343,9 @@ def have_mercy_answer(update, _):
     """Ответ бота на нажатие кнопки "О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏"."""
     button = ReplyKeyboardMarkup([[KOMBIKORM_BTN], [NO_FUNNY_BTN]],
                                  resize_keyboard=True)
-    update.message.reply_text(
-        text='Расслабься! Ш.И.К.А.Р.Н.-О пошутил\nБуду кормить тебя '
-             'ком-бикормом.\nИли что вы там еди-те? 😎',
-        reply_markup=button)
+    update.message.reply_text(text='Расслабься! Ш.И.К.А.Р.Н.-О пошутил\nБуду кормить тебя '
+                                   'ком-бикормом.\nИли что вы там еди-те? 😎',
+                              reply_markup=button)
 
 
 def no_funny_or_kombikorm(update, _):
@@ -369,13 +354,13 @@ def no_funny_or_kombikorm(update, _):
                                   [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                  resize_keyboard=True)
     if update.message.text == KOMBIKORM_BTN:
-        TEXT = txt.DOSIER
+        text = txt.DOSIER
     else:
-        TEXT = txt.NO_FUNNY
-    for text in TEXT[:-1]:
-        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
+        text = txt.NO_FUNNY
+    for phrase in text[:-1]:
+        update.message.reply_text(phrase, reply_markup=ReplyKeyboardRemove())
         time.sleep(1.5)
-    update.message.reply_text(TEXT[-1], reply_markup=button)
+    update.message.reply_text(text[-1], reply_markup=button)
 
 
 def secret_dossier(update, _):
@@ -484,15 +469,18 @@ def hidden_phrases(update, _):
 
 def no_play_or_game_rules(update, _):
     """Ответ на кнопки "В другой раз 🙅🏻‍♂️" и "Изи! Доставай 🤠"."""
-    if update.message.text == NEXT_TIME:
-        main = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN], [SONG_BTN, WHAT_ARE_YOU_BTN]], resize_keyboard=True)
+    if update.message.text == NEXT_TIME_BTN:
+        main = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN],
+                                    [SONG_BTN, WHAT_ARE_YOU_BTN]],
+                                   resize_keyboard=True)
         update.message.reply_text('Как знаешь. Угова-ривать не буду 😼', reply_markup=main)
     else:
-        global GAME_STAT, PLAYER
-        GAME_STAT = {'BOT': dict(wins=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0)}
+        global game_stat, PLAYER, bot_wins, user_wins, user_dice_counter, user_dice_result, triple_bet_bot, triple_bet_user
+        bot_wins, user_wins, user_dice_counter, user_dice_result, triple_bet_bot, triple_bet_user = 0, 0, 0, 0, 0, 0
         PLAYER = update.message.chat.full_name
-        GAME_STAT[f'{PLAYER}'] = dict(wins=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0)
-        button = ReplyKeyboardMarkup([[BEGIN_BTN]], resize_keyboard=True)
+        game_stat = {'BOT': dict(wins=0, dry_wins=0, triple_bet=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0),
+                     f'{PLAYER}': dict(wins=0, dry_wins=0, triple_bet=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0)}
+        button = ReplyKeyboardMarkup([[BEGIN_BTN], [HALL_OF_FAME_BTN]], resize_keyboard=True)
         for text in txt.RULES_DICE:
             update.message.reply_text(text, reply_markup=button if text == txt.RULES_DICE[-1] else ReplyKeyboardRemove())
             time.sleep(1)
@@ -503,53 +491,59 @@ def bot_bet_roll_dice(update, _):
     """Ответ на кнопки "Поехали 👌", "Твой ход 👆", "Хочу реванш 🥊" и "Дам тебе отыграться 😙"."""
     cancel = ReplyKeyboardMarkup([[NO_MORE_GAME_BTN]], resize_keyboard=True)
     choise = ReplyKeyboardMarkup([[REVENGE_BTN], [CATS_TRAIN_BTN]], resize_keyboard=True)
-    global BOT_WINS, USER_WINS
+    global bot_wins, user_wins, triple_bet_bot, triple_bet_user
+    if update.message.text == REVENGE_BTN:
+        update.message.reply_text('Не любишь проигры-вать? Ну-ну!\nПродолжаем 😎'); time.sleep(1)
+    if update.message.text == WIN_BACK_BTN:
+        update.message.reply_text('Ну всё - шутки кончились!\nБольше под-даваться не буду 😠'); time.sleep(1)
     bet_1, bet_2 = random.randint(3, 11), random.randint(3, 11)
     while bet_2 == bet_1:
         bet_2 = random.randint(3, 11)
     update.message.reply_text(f'Я поставлю на {bet_1} и {bet_2} ✍️', reply_markup=ReplyKeyboardRemove())
     time.sleep(1)
-    GAME_STAT['BOT']['made_bet'] += 1
+    game_stat['BOT']['made_bet'] += 1; triple_bet_bot += 1
     update.message.reply_text('Бросаю ко-сти... ✊')
     result = 0
     for _ in (1, 2):
         value = update.message.reply_dice()['dice']['value']
         result += value
-        time.sleep(1.5)
+        time.sleep(3)
     update.message.reply_text(f'Мой ре-зультат:  {result} ❗️', reply_markup=cancel)
     time.sleep(1)
+    if result not in (bet_1, bet_2): triple_bet_bot = 0
     if result in (bet_1, bet_2, 2, 12):
         if result == 2:
             update.message.reply_text('О, нет! 😱 Две еди-нички. Минус балл 😭')
-            GAME_STAT['BOT']['double_one'] += 1
-            if BOT_WINS > 0: BOT_WINS -= 1
+            game_stat['BOT']['double_one'] += 1
+            if bot_wins > 0: bot_wins -= 1
         elif result == 12:
             update.message.reply_text('Я со-рвал Джек пот 🥳\nДве шестёрки! Получаю балл 👏')
-            GAME_STAT['BOT']['double_six'] += 1
-            BOT_WINS += 1
+            game_stat['BOT']['double_six'] += 1
+            bot_wins += 1
         else:
-            update.message.reply_text('Ура! Удача на моей сто-роне 😄\nЯ вы-играл в этом раунде 🦾')
-            GAME_STAT['BOT']['guessed_bet'] += 1
-            BOT_WINS += 1
-        if BOT_WINS == USER_WINS:
-            update.message.reply_text(f'Счёт {BOT_WINS} : {USER_WINS}\nУ нас ничья 🍻')
+            update.message.reply_text('Ура! Мне повезло 😄\nЯ вы-играл в этом раунде 🦾')
+            game_stat['BOT']['guessed_bet'] += 1
+            bot_wins += 1
+        if bot_wins == user_wins:
+            update.message.reply_text(f'Счёт {bot_wins} : {user_wins}\nУ нас ничья 🍻')
         else:
             update.message.reply_text(
-                f'Счёт {BOT_WINS} : {USER_WINS}\n' + ('Я впереди 🤘' if BOT_WINS > USER_WINS else 'В твою пользу 😕'))
-        if BOT_WINS == 3:
+                f'Счёт {bot_wins} : {user_wins}\n' + ('Я впереди 🤘' if bot_wins > user_wins else 'В твою пользу 😕'))
+        if bot_wins == 3:
             time.sleep(1.5)
             update.message.reply_text(
-                f'Финальный ре-зультат: 💫 {BOT_WINS} : {USER_WINS} 💫' + ('  Всухую 🙈' if abs(BOT_WINS - USER_WINS) == 3 else '') +
+                f'Финальный ре-зультат: 💫 {bot_wins} : {user_wins} 💫' + ('  Всухую! Как котёнка 🙈' if user_wins == 0 else '') +
                 '\n\n' + 'Ехууу 🥳 Победа за мной!\nУчись у мастера, салага 😎',
                 reply_markup=choise)
-            GAME_STAT['BOT']['wins'] += 1
+            game_stat['BOT']['wins'] += 1
+            if user_wins == 0: game_stat['BOT']['dry_wins'] += 1
+            if triple_bet_bot == 3: game_stat['BOT']['triple_bet'] += 1
             time.sleep(1.5)
-            update.message.reply_text(func.dice_game_stat(GAME_STAT, PLAYER))
-            BOT_WINS = 0
-            USER_WINS = 0
+            update.message.reply_text(func.dice_game_stat(game_stat, PLAYER))
+            bot_wins, user_wins, triple_bet_bot, triple_bet_user = 0, 0, 0, 0
             return BOT_DICE
     else:
-        update.message.reply_text('Не угадал 😔\nЛадно, в следую-щий раз повезёт...')
+        update.message.reply_text('Не угадал 😔\nЛадно, в следую-щий раз по-везёт...')
     time.sleep(1)
     update.message.reply_text('Твоя оче-редь. Делай ставку ☝️ и бросай ко-сти.', reply_markup=cancel)
     return USER_BET
@@ -557,14 +551,14 @@ def bot_bet_roll_dice(update, _):
 
 def user_bets(update, _):
     """Ответ на ввод пользователем двух чисел перед бросками кубиков."""
-    global USER_BET_1, USER_BET_2
+    global user_bet_1, user_bet_2, triple_bet_user
     button = ReplyKeyboardMarkup([['🎲']], resize_keyboard=True)
-    USER_BET_1, USER_BET_2 = map(int, (update.message.text).split())
-    if USER_BET_1 == USER_BET_2:
-        update.message.reply_text('Числа должны быть раз-ными! Это в твоих же ин-тересах 🤦🏻‍♂️')
+    user_bet_1, user_bet_2 = map(int, (update.message.text).split())
+    if user_bet_1 == user_bet_2:
+        update.message.reply_text('Числа должны быть раз-ными! Это в твоих же инте-ресах 🤦🏻‍♂️')
     else:
         update.message.reply_text('Принято! Бросай ко-сти 🎲', reply_markup=button)
-        GAME_STAT[f'{PLAYER}']['made_bet'] += 1
+        game_stat[f'{PLAYER}']['made_bet'] += 1; triple_bet_user += 1
         return USER_DICE
 
 
@@ -572,66 +566,112 @@ def user_roll_dice(update, _):
     """Подсчёт результата бросков кубика игроком."""
     your_turn = ReplyKeyboardMarkup([[YOUR_TURN_BTN]], resize_keyboard=True)
     choice = ReplyKeyboardMarkup([[WIN_BACK_BTN], [EAT_CORN_BTN]], resize_keyboard=True)
-    global BOT_WINS, USER_DICE_COUNTER, USER_DICE_RESULT, USER_WINS
+    global user_dice_counter, user_dice_result, bot_wins, user_wins, triple_bet_user, triple_bet_bot
     points = update.message.dice['value']
-    USER_DICE_COUNTER += 1
-    USER_DICE_RESULT += points
-    if USER_DICE_COUNTER != 2:
+    user_dice_counter += 1
+    user_dice_result += points
+    if user_dice_counter == 1:
+        time.sleep(2)
         update.message.reply_text('Бросай ещё 👉')
-        return None
-    time.sleep(1.5)
-    update.message.reply_text(f'Твой результат:  {USER_DICE_RESULT} ❗️', reply_markup=your_turn)
-    if USER_DICE_RESULT in (USER_BET_1, USER_BET_2, 2, 12):
-        if USER_DICE_RESULT == 2:
+        return
+    time.sleep(3)
+    update.message.reply_text(f'Твой результат:  {user_dice_result} ❗️', reply_markup=your_turn)
+    if user_dice_result not in (user_bet_1, user_bet_2): triple_bet_user = 0
+    if user_dice_result in (user_bet_1, user_bet_2, 2, 12):
+        if user_dice_result == 2:
             update.message.reply_text('Ха! Две дырки 🙈 Не повез-ло. Минус балл.')
-            GAME_STAT[f'{PLAYER}']['double_one'] += 1
-            if USER_WINS > 0: USER_WINS -= 1
-        elif USER_DICE_RESULT == 12:
+            game_stat[f'{PLAYER}']['double_one'] += 1
+            if user_wins > 0: user_wins -= 1
+        elif user_dice_result == 12:
             update.message.reply_text('Ничего себе! Две шестёрки 😳 Получаешь балл.')
-            GAME_STAT[f'{PLAYER}']['double_six'] += 1
-            USER_WINS += 1
+            game_stat[f'{PLAYER}']['double_six'] += 1
+            user_wins += 1
         else:
-            update.message.reply_text('Удача на твоей сто-роне.\nТы угадал в этот раз 😠')
-            GAME_STAT[f'{PLAYER}']['guessed_bet'] += 1
-            USER_WINS += 1
-        if USER_WINS == BOT_WINS:
-            update.message.reply_text(f'Счёт {BOT_WINS} : {USER_WINS}\nУ нас ничья 🍻')
+            update.message.reply_text('Удача на твоей сто-роне.\nТы угадал в этот раз 😏')
+            game_stat[f'{PLAYER}']['guessed_bet'] += 1
+            user_wins += 1
+        if user_wins == bot_wins:
+            update.message.reply_text(f'Счёт {bot_wins} : {user_wins}\nУ нас ничья 🍻')
         else:
             update.message.reply_text(
-                f'Счёт {BOT_WINS} : {USER_WINS}\n' + ('Я впереди 🙃' if BOT_WINS > USER_WINS else 'В твою пользу 😒'))
-        if USER_WINS == 3:
+                f'Счёт {bot_wins} : {user_wins}\n' + ('Я впереди 🙃' if bot_wins > user_wins else 'В твою пользу 😒'))
+        if user_wins == 3:
             time.sleep(1.5)
             update.message.reply_text(
-                f'Финальный ре-зультат: 💫 {BOT_WINS} : {USER_WINS} 💫' + ('  Всухую 🙈' if abs(BOT_WINS - USER_WINS) == 3 else '') +
-                '\n\n' + 'Твоя победа!\nМожешь пола-комиться ку-курузкой 🌽😏\nНо не за-знавайся - тебе просто повез-ло 😈\nПонимаешь, да?',
+                f'Финальный ре-зультат: 💫 {user_wins} : {bot_wins} 💫' + ('  Всухую. Читер! 😠' if bot_wins == 0 else '') +
+                '\n\n' + 'Твоя победа!\nМожешь пола-комиться ку-курузкой 🌽\nНо не за-знавайся - тебе просто повез-ло 😈\nПонимаешь, да?',
                 reply_markup=choice)
-            GAME_STAT[f'{PLAYER}']['wins'] += 1
+            game_stat[f'{PLAYER}']['wins'] += 1
+            if bot_wins == 0: game_stat[f'{PLAYER}']['dry_wins'] += 1
+            if triple_bet_user == 3: game_stat[f'{PLAYER}']['triple_bet'] += 1
             time.sleep(1.5)
-            update.message.reply_text(func.dice_game_stat(GAME_STAT, PLAYER))
-            BOT_WINS = 0
-            USER_WINS = 0
+            update.message.reply_text(func.dice_game_stat(game_stat, PLAYER))
+            bot_wins, user_wins, triple_bet_user, triple_bet_bot = 0, 0, 0, 0
     else:
         update.message.reply_text('Не угадал 🤷🏻‍♂️ Ничего, бывает...\nПродолжаем ве-селиться 😉', reply_markup=your_turn)
-    USER_DICE_COUNTER, USER_DICE_RESULT = 0, 0
+    user_dice_counter, user_dice_result = 0, 0
     return BOT_DICE
 
 
 def cancel_game(update, _):
     """Ответ на кнопки "Больше не хочу играть 😐", "Точно! Хватит 🖐",
     "Пойду грызть свою кукурузку 😋" и "Пойду тренироваться. На кошках 🐈"."""
-    global BOT_WINS, USER_BET_1, USER_BET_2, USER_DICE_COUNTER, USER_DICE_RESULT, USER_WINS
     confirm = ReplyKeyboardMarkup([[ENOUGH_BTN], ['Нет, я передумал 🙃']], resize_keyboard=True)
     main = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN], [SONG_BTN, WHAT_ARE_YOU_BTN]], resize_keyboard=True)
-    if update.message.text == NO_MORE_GAME_BTN:
-        update.message.reply_text('Точно не хочешь про-должать?\nВесь прогресс сбросит-ся 🧐', reply_markup=confirm)
-    if update.message.text == CATS_TRAIN_BTN or update.message.text == EAT_CORN_BTN or update.message.text == ENOUGH_BTN:
+    text = update.message.text
+    if text == NO_MORE_GAME_BTN:
+        update.message.reply_text('Точно не хочешь про-должать? 🧐', reply_markup=confirm)
+    if text == CATS_TRAIN_BTN or text == EAT_CORN_BTN or text == ENOUGH_BTN:
         update.message.reply_text('Ладно. За-хочешь ещё сыграть - ты знаешь, где меня най-ти 😼',
                                   reply_markup=main)
-        BOT_WINS = 0
-        USER_DICE_COUNTER = 0
-        USER_DICE_RESULT = 0
-        USER_WINS = 0
         return ConversationHandler.END
+
+
+def show_hall_of_fame(update, _):
+    """Ответ на нажатие кнопки "Покажи зал славы игроков 🤩"."""
+    update.message.reply_text('🌟  З А Л    С Л А В Ы  🌟\n'
+                              'Вот они - лучшие игроки, борю-щиеся за звание Абсолютного чем-пиона!\n'
+                              'Не каждый сможет оказать-ся на вершине рейтинга, но любой может ис-пытать удачу 🍀💪')
+    update.message.reply_text('⚠️ Для того, чтобы войти в трой-ку лидеров, необходимо оты-грать хотя бы 5 раундов ✅',
+                              reply_markup=ReplyKeyboardMarkup([[BEGIN_BTN]], resize_keyboard=True))
+    time.sleep(1)
+    rating, last_champion = func.hall_of_fame()
+    medals = ['🥉', '🥈', '🥇']
+    champion = ''
+    places = '〰️〰️〰️〰️〰️〰️〰️〰️〰️\n'
+    rest = '〰️〰️〰️〰️〰️〰️〰️〰️〰️\n'
+    for person in rating:
+        if person[5] >= 5 and medals:
+            places += f'{medals[-1]}  ' + f'{person[-1]}' + '\n'
+            medals.pop()
+            if not champion:
+                champion = f'Чемпион:  {person[-1]}  👑\n'
+                champ_name = person[-1]
+        else:
+            rest += f'{person[-1]}' + f'  >  осталось сыграть:  {5 - person[5]}\n' if person[5] < 5 else '  🔝\n'
+    if champion:
+        if champ_name != last_champion['name']:
+            today = dt.date.today().strftime('%d.%m.%Y г.')
+            db = shelve.open('statistic')
+            db['DICE_CHAMPION']['name'] = champ_name
+            db['DICE_CHAMPION']['date'] = today
+            db.close()
+            champion_from_date = today + '\n'
+        else:
+            champion_from_date = last_champion['date'] + '\n'
+    update.message.reply_text(champion + ('получил титул ' if champion else '') + (champion_from_date if champion else '') + places + rest)
+    for (share_of_wins, average_dice_to_win, share_of_guessed_bet, dry_wins, triple_bet, games, wins, looses,
+         made_bet, guessed_bet, double_six, share_of_double_six, double_one, share_of_double_one,
+         share_of_dry_wins, share_of_triple_bet, name) in rating:
+        update.message.reply_text(
+            f'🔸 {name} 🔸  Сыграно раундов:  {games}\nПобеды:  {wins} ~ {-share_of_wins:.1f}%    Поражения:  {looses}\n'
+            f'Победы "всухую" (счёт 3:0):  {-dry_wins} ~ {share_of_dry_wins:.1f}%\n'
+            f'Победы "без шансов" (угаданы подряд три ставки):  {-triple_bet} ~ {share_of_triple_bet:.1f}%\n'
+            f'В среднем бросков для победы:  {average_dice_to_win:.1f}\nВсего ставок:  {made_bet}  Угадано:  {guessed_bet} ~ {-share_of_guessed_bet:.1f}%\n'
+            f'6️⃣6️⃣ выпадали:  {double_six} ~ {share_of_double_six:.1f}%\n1️⃣1️⃣ выпадали:  {double_one} ~ {share_of_double_one:.1f}%\n'
+        )
+    update.message.reply_text('Ну что, готов(а) сместить текуще-го чемпиона? Кажется, он уже засиделся... 🤫')
+    return BOT_DICE
 
 
 def place_bet(update, _):
@@ -646,16 +686,16 @@ def go_on(update, _):
 
 def dice_fallback(update, _):
     """Стандартный ответ внутри диалога игры в кости."""
-    update.message.reply_text('У нас игра. Не отвле-кайся 🤨')
+    update.message.reply_text('Идёт игра. Не отвле-кайся 🤨')
 
 
 def main():
     """Основная функция запуска бота."""
-    updater = Updater(token=token)
+    updater = Updater(token=TOKEN)
     handler = updater.dispatcher.add_handler
     handler(CommandHandler('start', wake_up))
     birthday_сonversation = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex(SURPRISE_ME), birthday_init)],
+        entry_points=[MessageHandler(Filters.regex(SURPRISE_ME_BTN), birthday_init)],
         states={
             BIRTH_1: [MessageHandler(Filters.regex(STUPID_BTN + '|' + NOT_STUPID_BTN), cancel_or_birthday_1)],
             BIRTH_2: [MessageHandler(Filters.regex(DONE_NEXT_BTN + '|' + r'^\d{1,2}$'), birthday_2)],
@@ -682,11 +722,12 @@ def main():
     )
     handler(falafel_сonversation)
     dice_game_сonversation = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex(NEXT_TIME + '|' + LETS_PLAY), no_play_or_game_rules)],
+        entry_points=[MessageHandler(Filters.regex(NEXT_TIME_BTN + '|' + LETS_PLAY_BTN), no_play_or_game_rules)],
         states={
             BOT_DICE: [MessageHandler(Filters.regex(BEGIN_BTN + '|' + YOUR_TURN_BTN + '|' + REVENGE_BTN + '|' + WIN_BACK_BTN),
                                       bot_bet_roll_dice),
-                       MessageHandler(Filters.regex(CATS_TRAIN_BTN + '|' + EAT_CORN_BTN), cancel_game)],
+                       MessageHandler(Filters.regex(CATS_TRAIN_BTN + '|' + EAT_CORN_BTN), cancel_game),
+                       MessageHandler(Filters.regex(HALL_OF_FAME_BTN), show_hall_of_fame)],
             USER_BET: [MessageHandler(Filters.regex(BET_RANGE), user_bets),
                        MessageHandler(Filters.regex(NO_MORE_GAME_BTN + '|' + ENOUGH_BTN), cancel_game),
                        MessageHandler(Filters.all, place_bet)],
