@@ -2,8 +2,8 @@
 .env
 venv
 
-code/__pycache__
+__pycache__
 
-code/awesom_o.py.log*
+awesom_o.py.log*
 
 доработки.txt

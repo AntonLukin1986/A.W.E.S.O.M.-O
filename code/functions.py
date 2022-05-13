@@ -1,18 +1,18 @@
 import shelve
 
 
-def dice_game_stat(game_stat, PLAYER):
+def dice_game_stat(game_stat, player):
     """Анализ статистики. Выводится в конце раунда и сохраненяется в БД."""
     bot_win = game_stat['BOT']['wins']
     bot_made_bet = game_stat['BOT']['made_bet']
     bot_guessed_bet = game_stat['BOT']['guessed_bet']
     bot_double_six = game_stat['BOT']['double_six']
     bot_double_one = game_stat['BOT']['double_one']
-    player_win = game_stat[f'{PLAYER}']['wins']
-    player_made_bet = game_stat[f'{PLAYER}']['made_bet']
-    player_guessed_bet = game_stat[f'{PLAYER}']['guessed_bet']
-    player_double_six = game_stat[f'{PLAYER}']['double_six']
-    player_double_one = game_stat[f'{PLAYER}']['double_one']
+    player_win = game_stat[f'{player}']['wins']
+    player_made_bet = game_stat[f'{player}']['made_bet']
+    player_guessed_bet = game_stat[f'{player}']['guessed_bet']
+    player_double_six = game_stat[f'{player}']['double_six']
+    player_double_one = game_stat[f'{player}']['double_one']
     total_games = bot_win + player_win
     db = shelve.open('statistic')
     for player in game_stat:
@@ -26,13 +26,17 @@ def dice_game_stat(game_stat, PLAYER):
             statistic[player][key] += value
     db['DICE'] = statistic
     db.close()
-    return (f'Ш.И.К.А.Р.Н.-О  🆚  {PLAYER}\n 👊 cыграно раундов:  {total_games}\n\n'
-            '✅ Ш.И.К.А.Р.Н.-О\n'
-            f'победы:  {bot_win}\nпроигрыши:  {player_win}\nсделал ставок:  {bot_made_bet}\nугадал:  {bot_guessed_bet}\n'
-            f'6️⃣6️⃣ выпадали:  {bot_double_six}\n1️⃣1️⃣ выпадали:  {bot_double_one}\n\n'
-            f'✅ {PLAYER}\n'
-            f'победы:  {player_win}\nпроигрыши:  {bot_win}\nсделано ставок:  {player_made_bet}\nугадано:  {player_guessed_bet}\n'
-            f'6️⃣6️⃣ выпадали:  {player_double_six}\n1️⃣1️⃣ выпадали:  {player_double_one}')
+    return (
+        f'Ш.И.К.А.Р.Н.-О  🆚  {player}\n 👊 cыграно раундов:  {total_games}\n\n'
+        '✅ Ш.И.К.А.Р.Н.-О\n'
+        f'победы:  {bot_win}\nпроигрыши:  {player_win}\nсделал ставок:  '
+        f'{bot_made_bet}\nугадал:  {bot_guessed_bet}\n6️⃣6️⃣ выпадали:  '
+        f'{bot_double_six}\n1️⃣1️⃣ выпадали:  {bot_double_one}\n\n'
+        f'✅ {player}\n'
+        f'победы:  {player_win}\nпроигрыши:  {bot_win}\nсделано ставок:  '
+        f'{player_made_bet}\nугадано:  {player_guessed_bet}\n6️⃣6️⃣ выпадали:'
+        f'  {player_double_six}\n1️⃣1️⃣ выпадали:  {player_double_one}'
+    )
 
 
 def hall_of_fame():
@@ -57,9 +61,12 @@ def hall_of_fame():
         share_of_double_six = double_six / made_bet * 100
         double_one = data['double_one']
         share_of_double_one = double_one / made_bet * 100
-        add = (-share_of_wins, average_dice_to_win, -share_of_guessed_bet, -dry_wins, -triple_bet, games, wins,
-               looses, made_bet, guessed_bet, double_six, share_of_double_six, double_one, share_of_double_one,
-               share_of_dry_wins, share_of_triple_bet, name)
+        add = (
+            -share_of_wins, average_dice_to_win, -share_of_guessed_bet,
+            -dry_wins, -triple_bet, games, wins, looses, made_bet,
+            guessed_bet, double_six, share_of_double_six, double_one,
+            share_of_double_one, share_of_dry_wins, share_of_triple_bet, name
+        )
         rating.append(add)
     last_champion = db['DICE_CHAMPION']
     db.close()
