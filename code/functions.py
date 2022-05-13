@@ -2,7 +2,7 @@ import shelve
 
 
 def dice_game_stat(game_stat, PLAYER):
-    """Анализ статистики для вывода в конце раунда. И сохранение в БД."""
+    """Анализ статистики. Выводится в конце раунда и сохраненяется в БД."""
     bot_win = game_stat['BOT']['wins']
     bot_made_bet = game_stat['BOT']['made_bet']
     bot_guessed_bet = game_stat['BOT']['guessed_bet']
