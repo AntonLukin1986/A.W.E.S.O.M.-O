@@ -2,6 +2,6 @@
 .env
 venv
 
-__pycache__
+code/__pycache__
 
-a.w.e.s.o.m.-o.py.log*
+code/awesom_o.py.log*
