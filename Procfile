@@ -1,1 +1,1 @@
-worker: python A.W.E.S.O.M.-O.py
+worker: python code/awesom_o.py

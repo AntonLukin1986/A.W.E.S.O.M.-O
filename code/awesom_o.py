@@ -9,10 +9,10 @@ import time
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from telegram import Bot, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import (CommandHandler, ConversationHandler, Filters, MessageHandler, Updater)
+from telegram.ext import CommandHandler, ConversationHandler, Filters, MessageHandler, Updater
 import requests
 
-import functions as func  # локальный импорт через . не работает!?
+import functions as func
 import texts_for_bot as txt
 
 
@@ -470,14 +470,17 @@ def hidden_phrases(update, _):
 def no_play_or_game_rules(update, _):
     """Ответ на кнопки "В другой раз 🙅🏻‍♂️" и "Изи! Доставай 🤠"."""
     if update.message.text == NEXT_TIME_BTN:
-        main = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN],
+        main = ReplyKeyboardMarkup([[CAT_BTN, ANECDOTE_BTN],        # все кнопки объединить под переменной main_menu
                                     [SONG_BTN, WHAT_ARE_YOU_BTN]],
                                    resize_keyboard=True)
         update.message.reply_text('Как знаешь. Угова-ривать не буду 😼', reply_markup=main)
     else:
         global game_stat, PLAYER, bot_wins, user_wins, user_dice_counter, user_dice_result, triple_bet_bot, triple_bet_user
-        bot_wins, user_wins, user_dice_counter, user_dice_result, triple_bet_bot, triple_bet_user = 0, 0, 0, 0, 0, 0
+        bot_wins, user_wins, user_dice_counter, user_dice_result, triple_bet_bot, triple_bet_user = [0] * 6  # ПРОВЕРИТЬ !!!
         PLAYER = update.message.chat.full_name
+        # заменить. ПРОВЕРИТЬ принтом !!!
+        # init_stat = dict(wins=0, dry_wins=0, triple_bet=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0)
+        # game_stat = {'BOT': init_stat, f'{PLAYER}': init_stat.copy()}
         game_stat = {'BOT': dict(wins=0, dry_wins=0, triple_bet=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0),
                      f'{PLAYER}': dict(wins=0, dry_wins=0, triple_bet=0, double_six=0, double_one=0, made_bet=0, guessed_bet=0)}
         button = ReplyKeyboardMarkup([[BEGIN_BTN], [HALL_OF_FAME_BTN]], resize_keyboard=True)
@@ -490,7 +493,7 @@ def no_play_or_game_rules(update, _):
 def bot_bet_roll_dice(update, _):
     """Ответ на кнопки "Поехали 👌", "Твой ход 👆", "Хочу реванш 🥊" и "Дам тебе отыграться 😙"."""
     cancel = ReplyKeyboardMarkup([[NO_MORE_GAME_BTN]], resize_keyboard=True)
-    choise = ReplyKeyboardMarkup([[REVENGE_BTN], [CATS_TRAIN_BTN]], resize_keyboard=True)
+    choice = ReplyKeyboardMarkup([[REVENGE_BTN], [CATS_TRAIN_BTN]], resize_keyboard=True)
     global bot_wins, user_wins, triple_bet_bot, triple_bet_user
     if update.message.text == REVENGE_BTN:
         update.message.reply_text('Не любишь проигры-вать? Ну-ну!\nПродолжаем 😎'); time.sleep(1)
@@ -534,7 +537,7 @@ def bot_bet_roll_dice(update, _):
             update.message.reply_text(
                 f'Финальный ре-зультат: 💫 {bot_wins} : {user_wins} 💫' + ('  Всухую! Как котёнка 🙈' if user_wins == 0 else '') +
                 '\n\n' + 'Ехууу 🥳 Победа за мной!\nУчись у мастера, салага 😎',
-                reply_markup=choise)
+                reply_markup=choice)
             game_stat['BOT']['wins'] += 1
             if user_wins == 0: game_stat['BOT']['dry_wins'] += 1
             if triple_bet_bot == 3: game_stat['BOT']['triple_bet'] += 1
@@ -629,7 +632,7 @@ def cancel_game(update, _):
 
 def show_hall_of_fame(update, _):
     """Ответ на нажатие кнопки "Покажи зал славы игроков 🤩"."""
-    update.message.reply_text('🌟  З А Л    С Л А В Ы  🌟\n'
+    update.message.reply_text('🌟  З А Л    С Л А В Ы  🌟\n'        # поиграть с шрифтами (в конце файла образец)
                               'Вот они - лучшие игроки, борю-щиеся за звание Абсолютного чем-пиона!\n'
                               'Не каждый сможет оказать-ся на вершине рейтинга, но любой может ис-пытать удачу 🍀💪')
     update.message.reply_text('⚠️ Для того, чтобы войти в трой-ку лидеров, необходимо оты-грать хотя бы 5 раундов ✅',
@@ -762,3 +765,8 @@ def main():
 if __name__ == '__main__':
     # start_logging()
     main()
+
+
+# Жирный —> **text**
+# Курсив —> __text__
+# Моноширинный —> “`text“`
