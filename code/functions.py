@@ -56,7 +56,7 @@ def record_new_visitor(update) -> None:
 
 def visitors_list() -> str:
     """Создаёт перечень посетителей бота в виде строки."""
-    db = shelve.open('statistic/statistic')
+    db = shelve.open('/app/code/statistic/statistic')  # statistic/statistic
     visitors = db.get('VISITORS')
     if visitors is None:
         text = 'Посетителей не было 🙅🏻‍♂️'
