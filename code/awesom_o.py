@@ -338,7 +338,7 @@ def birthday_4(update, _):
         update.message.reply_text(
             text='Так это же сегодня!\nПо-здравляю с Днём Варенья!\n'
                  'Расти большой, не будь ла-пшой 🥳🎊🎉'
-            )
+        )
     return BIRTH_5
 
 
@@ -392,7 +392,7 @@ def show_anecdote(update, _):
         update.message.reply_text(
             text='Дол-баные вышки 5G. Они жгут мои микро-схемы 😕\n'
                  'Расскажу в сле-дующий раз...'
-            )
+        )
 
 
 def bravo_or_so_so(update, _):
@@ -422,7 +422,7 @@ def zodiac_init_or_end(update, _):
         update.message.reply_text(
             text='Если бы у ме-ня были лоб и рука - я бы сейчас сде-лал фэйс'
                  'палм 🤦🏻‍♂️\nИ, возможно, повредил бы себе ми-кросхемы...\n'
-            )
+        )
         time.sleep(2)
         update.message.reply_text(
             text='Этот гороскоп я сам только что вы-думал. '
@@ -448,12 +448,10 @@ def zodiac_init_or_end(update, _):
 
 def zodiac_result(update, _):
     """Ответ на выбор знака зодиака. Выдача гороскопа."""
-    result = (
-        random.choice(txt.HOROSCOPE['first']) +
-        random.choice(txt.HOROSCOPE['second']) +
-        random.choice(txt.HOROSCOPE['second_add']) +
-        random.choice(txt.HOROSCOPE['third'])
-    )
+    result = (random.choice(txt.HOROSCOPE['first'])
+              + random.choice(txt.HOROSCOPE['second'])
+              + random.choice(txt.HOROSCOPE['second_add'])
+              + random.choice(txt.HOROSCOPE['third']))
     query = update.callback_query
     query.answer()
     query.edit_message_text(text=f'Го-роскоп для знака зодиака {query.data}')
@@ -657,15 +655,16 @@ def bot_bet_roll_dice(update, _):
             )
         else:
             update.message.reply_text(
-                f'Счёт {bot_wins} : {user_wins}\n' +
-                ('Я впереди 🤘' if bot_wins > user_wins else 'В твою пользу 😕')
+                f'Счёт {bot_wins} : {user_wins}\n'
+                + ('Я впереди 🤘' if bot_wins > user_wins
+                   else 'В твою пользу 😕')
             )
         if bot_wins == 3:
             time.sleep(1.5)
             update.message.reply_text(
-                f'Финальный ре-зультат: 💫 {bot_wins} : {user_wins} 💫' +
-                ('  Всухую! Как котёнка 🙈' if user_wins == 0 else '') +
-                '\n\nЕхууу 🥳 Победа за мной!\nУчись у ма-стера, салага 😎',
+                f'Финальный ре-зультат: 💫 {bot_wins} : {user_wins} 💫'
+                + ('  Всухую! Как котёнка 🙈' if user_wins == 0 else '')
+                + '\n\nЕхууу 🥳 Победа за мной!\nУчись у ма-стера, салага 😎',
                 reply_markup=choice)
             game_stat['BOT']['wins'] += 1
             if user_wins == 0:
@@ -760,15 +759,16 @@ def user_roll_dice(update, _):
             )
         else:
             update.message.reply_text(
-                f'Счёт {bot_wins} : {user_wins}\n' +
-                ('Я впереди 🙃' if bot_wins > user_wins else 'В твою пользу 😒')
+                f'Счёт {bot_wins} : {user_wins}\n'
+                + ('Я впереди 🙃' if bot_wins > user_wins
+                   else 'В твою пользу 😒')
             )
         if user_wins == 3:
             time.sleep(1.5)
             update.message.reply_text(
-                f'Финальный ре-зультат: 💫 {user_wins} : {bot_wins} 💫' +
-                ('  Всухую. Читер! 😠' if bot_wins == 0 else '') +
-                '\n\nТвоя победа!\nМожешь пола-комиться ку-курузкой 🌽\n'
+                f'Финальный ре-зультат: 💫 {user_wins} : {bot_wins} 💫'
+                + ('  Всухую. Читер! 😠' if bot_wins == 0 else '')
+                + '\n\nТвоя победа!\nМожешь пола-комиться ку-курузкой 🌽\n'
                 'Но не за-знавайся - тебе просто повез-ло 😈\nПонимаешь, да?',
                 reply_markup=choice
             )
@@ -849,8 +849,9 @@ def show_hall_of_fame(update, _):
         else:
             champion_from_date = last_champion['date'] + '\n'
     bot.send_message(chat_id=chat_id,
-                     text=champion + ('получил титул ' if champion else '') +
-                     (champion_from_date if champion else '') + places + rest)
+                     text=champion + ('получил титул ' if champion else '')
+                     + (champion_from_date if champion else '')
+                     + places + rest)
     for (share_of_wins, average_dice_to_win, share_of_guessed_bet, dry_wins,
          triple_bet, games, wins, looses, made_bet, guessed_bet, double_six,
          share_of_double_six, double_one, share_of_double_one,
