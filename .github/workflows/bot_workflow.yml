@@ -59,4 +59,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.AWESOM_O_TOKEN }}
-        message: ${{ github.workflow }} успешно выполнен!
+        message: Воркфлоу ${{ github.workflow }} успешно выполнен!
