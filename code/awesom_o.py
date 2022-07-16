@@ -1027,5 +1027,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # func.start_logging()
+    func.start_logging()
     main()
