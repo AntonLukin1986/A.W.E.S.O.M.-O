@@ -840,7 +840,7 @@ def show_hall_of_fame(update, _):
     if champion:
         if champ_name != last_champion.get('name'):
             today = dt.date.today().strftime('%d.%m.%Y г.')
-            db = shelve.open('statistic')
+            db = shelve.open('code/statistic/statistic')
             last_champ = db['DICE_CHAMPION']
             last_champ.update({'name': champ_name, 'date': today})
             db['DICE_CHAMPION'] = last_champ
