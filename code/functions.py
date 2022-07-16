@@ -1,4 +1,6 @@
 """Подключаемые функции для бота Ш.И.К.А.Р.Н.-О.."""
+from __future__ import annotations
+
 import datetime as dt
 import logging
 import shelve
@@ -39,7 +41,7 @@ def inline_menu(buttons: list,
 def record_new_visitor(update) -> None:
     """Учёт пользователей, контактировавших с ботом."""
     user_id = update.message.chat.id
-    db = shelve.open('statistic')
+    db = shelve.open('statistic/statistic')
     visitors = db.setdefault('VISITORS', {})
     if user_id not in visitors:
         user = update.message.chat
@@ -54,7 +56,7 @@ def record_new_visitor(update) -> None:
 
 def visitors_list() -> str:
     """Создаёт перечень посетителей бота в виде строки."""
-    db = shelve.open('statistic')
+    db = shelve.open('statistic/statistic')
     visitors = db.get('VISITORS')
     if visitors is None:
         text = 'Посетителей не было 🙅🏻‍♂️'
@@ -79,7 +81,7 @@ def dice_game_stat(game_stat: dict, player: str) -> str:
     player_double_six = game_stat[player]['double_six']
     player_double_one = game_stat[player]['double_one']
     total_games = bot_win + player_win
-    db = shelve.open('statistic')
+    db = shelve.open('statistic/statistic')
     for player in game_stat:
         game_stat[player]['games'] = total_games
     statistic = db.setdefault('DICE', {})
@@ -106,7 +108,7 @@ def dice_game_stat(game_stat: dict, player: str) -> str:
 
 def hall_of_fame() -> tuple[Optional[list], Optional[dict]]:
     """Сортировка игроков в зависимости от статистических показателей."""
-    db = shelve.open('statistic')
+    db = shelve.open('statistic/statistic')
     if not db.get('DICE'):
         return None, None
     rating = []
