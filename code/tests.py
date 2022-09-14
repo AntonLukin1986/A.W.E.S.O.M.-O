@@ -1,7 +1,7 @@
 import unittest
 
-from awesom_o import (BET_RANGE, CARTMAN, CREATOR, INNA, KENNY, KEP4IK,
-                      LEMUR, MARIK, MARINA, MARKLAR, ZAJA, ZERO)
+from awesom_o import (BET_RANGE, CARTMAN, CREATOR, INNA, KENNY, KEP4IK, LEMUR,
+                      MARIK, MARINA, MARKLAR, ZAJA, ZERO)
 
 
 class TestPhrases(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestPhrases(unittest.TestCase):
             ('Кто такой Кэп?', KEP4IK),
             ('Кто такая Лемур?', LEMUR),
             ('Кто такой Марик?', MARIK),
-            ('Кто такая Маришка?',  MARINA),
+            ('Кто такая Маришка?', MARINA),
             ('Кто такой Зажа?', ZAJA)
         ]
         for phrase, regex in cases:
