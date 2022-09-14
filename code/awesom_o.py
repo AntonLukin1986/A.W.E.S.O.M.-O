@@ -18,8 +18,8 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
 
-from . import functions as func
-from . import texts_for_bot as txt
+import functions as func
+import texts_for_bot as txt
 
 load_dotenv()
 TOKEN = os.getenv('AWESOM_O_TOKEN')
