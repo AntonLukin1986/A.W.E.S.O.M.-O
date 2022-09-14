@@ -1,10 +1,15 @@
-"""Подключаемые функции для бота Ш.И.К.А.Р.Н.-О.."""
+"""Подключаемые функции для бота Ш.И.К.А.Р.Н.-О."""
+
 from __future__ import annotations
 
 import datetime as dt
 import logging
 import shelve
+from pathlib import Path
 from typing import Optional
+
+MY_IDS = (5013265599, 1939133250)
+STATISTIC_PATH = str(Path(__file__).resolve().parent / 'statistic/statistic')
 
 
 def start_logging() -> None:
@@ -16,20 +21,27 @@ def start_logging() -> None:
         handlers=[
             logging.StreamHandler(),
             logging.handlers.RotatingFileHandler(
-                'awesom_o.py.log',  # __file__ + '.log' -> текущее имя модуля
+                'awesom_o.py.log',  # вариант: __file__ + '.log'
                 maxBytes=2100000,
                 backupCount=2,
                 encoding='utf-8'
             )
         ]
     )
+    return
 
 
-def inline_menu(buttons: list,
-                columns: int,
-                first_buttons: Optional[list] = None,
-                last_buttons: Optional[list] = None) -> list[list]:
-    """Функция для создание меню инлайн-кнопок."""
+def inline_menu(buttons: list[str],
+                columns: int = 1,
+                first_buttons: Optional[list[str]] = None,
+                last_buttons: Optional[list[str]] = None) -> list[list[str]]:
+    """Функция для создания меню из инлайн-кнопок.
+    Запуск доктестов: python -m doctest [-v детали] functions.py
+    >>> inline_menu(['Кн1', 'Кн2', 'Кн3'])
+    [['Кн1'], ['Кн2'], ['Кн3']]
+    >>> inline_menu(['Кн1', 'Кн2', 'Кн3'], 2)
+    [['Кн1', 'Кн2'], ['Кн3']]
+    """
     menu = [buttons[i:i + columns] for i in range(0, len(buttons), columns)]
     if first_buttons:
         menu.insert(0, [first_buttons])
@@ -41,24 +53,26 @@ def inline_menu(buttons: list,
 def record_new_visitor(update) -> None:
     """Учёт пользователей, контактировавших с ботом."""
     user_id = update.message.chat.id
-    db = shelve.open('code/statistic/statistic')
+    if user_id in MY_IDS:
+        return
+    db = shelve.open(STATISTIC_PATH)
     visitors = db.setdefault('VISITORS', {})
     if user_id not in visitors:
         user = update.message.chat
         joined = dt.date.today().strftime('%d.%m.%Y')
-        data = (
-            f'ник: {user.username}, имя: {user.first_name}, дата: {joined}\n'
-        )
+        data = (f'ник: {user.username}, имя: {user.full_name}, '
+                f'дата: {joined}\n')
         visitors[user_id] = data
         db['VISITORS'] = visitors
     db.close()
+    return
 
 
 def visitors_list() -> str:
     """Создаёт перечень посетителей бота в виде строки."""
-    db = shelve.open('code/statistic/statistic')
+    db = shelve.open(STATISTIC_PATH)
     visitors = db.get('VISITORS')
-    if visitors is None:
+    if not visitors:
         text = 'Посетителей не было 🙅🏻‍♂️'
     else:
         text = '✏️    Посетители:\n'
@@ -68,7 +82,8 @@ def visitors_list() -> str:
     return text
 
 
-def dice_game_stat(game_stat: dict, player: str) -> str:
+def dice_game_stat(game_stat: dict[str, dict[str, int]], player: int,
+                   name: str) -> str:
     """Анализ статистики. Выводится в конце раунда и сохраненяется в БД."""
     bot_win = game_stat['BOT']['wins']
     bot_made_bet = game_stat['BOT']['made_bet']
@@ -81,7 +96,8 @@ def dice_game_stat(game_stat: dict, player: str) -> str:
     player_double_six = game_stat[player]['double_six']
     player_double_one = game_stat[player]['double_one']
     total_games = bot_win + player_win
-    db = shelve.open('code/statistic/statistic')
+    game_stat[player]['player_name'] = name
+    db = shelve.open(STATISTIC_PATH)
     for player in game_stat:
         game_stat[player]['games'] = total_games
     statistic = db.setdefault('DICE', {})
@@ -90,30 +106,40 @@ def dice_game_stat(game_stat: dict, player: str) -> str:
             statistic[player] = new_data
             continue
         for key, value in new_data.items():
+            if key == 'player_name':
+                continue
             statistic[player][key] += value
     db['DICE'] = statistic
     db.close()
     return (
-        f'Ш.И.К.А.Р.Н.-О  🆚  {player}\n 👊 cыграно раундов:  {total_games}\n\n'
+        f'Ш.И.К.А.Р.Н.-О  🆚  {name}\n 👊 cыграно раундов:  {total_games}\n\n'
         '✅ Ш.И.К.А.Р.Н.-О\n'
         f'победы:  {bot_win}\nпроигрыши:  {player_win}\nсделал ставок:  '
         f'{bot_made_bet}\nугадал:  {bot_guessed_bet}\n6️⃣6️⃣ выпадали:  '
         f'{bot_double_six}\n1️⃣1️⃣ выпадали:  {bot_double_one}\n\n'
-        f'✅ {player}\n'
+        f'✅ {name}\n'
         f'победы:  {player_win}\nпроигрыши:  {bot_win}\nсделано ставок:  '
         f'{player_made_bet}\nугадано:  {player_guessed_bet}\n6️⃣6️⃣ выпадали:'
         f'  {player_double_six}\n1️⃣1️⃣ выпадали:  {player_double_one}'
     )
 
 
-def hall_of_fame() -> tuple[Optional[list], Optional[dict]]:
+def hall_of_fame() -> (
+    tuple[
+        Optional[list[tuple[
+            float, float, float, float, float, float, float, float, float,
+            float, float, float, float, float, float, float, str
+        ]]],
+        Optional[dict[str, str]]
+    ]
+):
     """Сортировка игроков в зависимости от статистических показателей."""
-    db = shelve.open('code/statistic/statistic')
-    if not db.get('DICE'):
+    db = shelve.open(STATISTIC_PATH)
+    if db.get('DICE') is None:
         return None, None
     rating = []
     for player, data in db['DICE'].items():
-        name = 'Ш.И.К.А.Р.Н.-О 🤖' if player == 'BOT' else player
+        name = 'Ш.И.К.А.Р.Н.-О 🤖' if player == 'BOT' else data['player_name']
         games = data['games']
         wins = data['wins']
         share_of_wins = wins / games * 100
@@ -146,3 +172,8 @@ def hall_of_fame() -> tuple[Optional[list], Optional[dict]]:
     db.close()
     rating.sort()
     return rating, last_champion
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()  # запуск доктестов через python functions.py

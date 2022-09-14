@@ -1,4 +1,5 @@
 """Телеграм-бот Ш.И.К.А.Р.Н.-О."""
+
 import datetime as dt
 import logging
 import os
@@ -6,10 +7,9 @@ import random
 import re
 import shelve
 import time
+from pathlib import Path
 
-import functions as func
 import requests
-import texts_for_bot as txt
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from telegram import (Bot, InlineKeyboardButton, InlineKeyboardMarkup,
@@ -18,10 +18,14 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
 
+import functions as func
+import texts_for_bot as txt
+
 load_dotenv()
 TOKEN = os.getenv('AWESOM_O_TOKEN')
 bot = Bot(token=TOKEN)
 
+STATISTIC_PATH = str(Path(__file__).resolve().parent / 'statistic/statistic')
 
 ADORE_HOROSCOPE_BTN = ('Ух ты! Обожаю гороскопы 😍 Они всегда сбываются! '
                        'И вообще, мой знак зодиака - самый лучший 🤘')
@@ -571,7 +575,7 @@ def no_play_or_game_rules(update, _):
     global user_dice_result, triple_bet_bot, triple_bet_user
     (bot_wins, user_wins, user_dice_counter, user_dice_result, triple_bet_bot,
      triple_bet_user) = [0] * 6
-    PLAYER = update.message.chat.full_name
+    PLAYER = update.message.chat.id
     init_stat = dict(wins=0, dry_wins=0, triple_bet=0, double_six=0,
                      double_one=0, made_bet=0, guessed_bet=0)
     game_stat = {'BOT': init_stat, PLAYER: init_stat.copy()}
@@ -672,7 +676,9 @@ def bot_bet_roll_dice(update, _):
             if triple_bet_bot == 3:
                 game_stat['BOT']['triple_bet'] += 1
             time.sleep(1.5)
-            update.message.reply_text(func.dice_game_stat(game_stat, PLAYER))
+            update.message.reply_text(func.dice_game_stat(
+                game_stat, PLAYER, update.message.chat.full_name
+            ))
             bot_wins, user_wins, triple_bet_bot, triple_bet_user = [0] * 4
             return BOT_DICE
     else:
@@ -681,7 +687,7 @@ def bot_bet_roll_dice(update, _):
         )
     time.sleep(1)
     update.message.reply_text(
-        text='Твоя оче-редь. Делай ставку ☝️ и бросай ко-сти.',
+        text='Твоя оче-редь. Делай ставку ☝️.',
         reply_markup=cancel
     )
     return USER_BET
@@ -778,7 +784,9 @@ def user_roll_dice(update, _):
             if triple_bet_user == 3:
                 game_stat[PLAYER]['triple_bet'] += 1
             time.sleep(1.5)
-            update.message.reply_text(func.dice_game_stat(game_stat, PLAYER))
+            update.message.reply_text(func.dice_game_stat(
+                game_stat, PLAYER, update.message.chat.full_name)
+            )
             bot_wins, user_wins, triple_bet_user, triple_bet_bot = [0] * 4
     else:
         update.message.reply_text(
@@ -840,7 +848,7 @@ def show_hall_of_fame(update, _):
     if champion:
         if champ_name != last_champion.get('name'):
             today = dt.date.today().strftime('%d.%m.%Y г.')
-            db = shelve.open('code/statistic/statistic')
+            db = shelve.open(STATISTIC_PATH)
             last_champ = db['DICE_CHAMPION']
             last_champ.update({'name': champ_name, 'date': today})
             db['DICE_CHAMPION'] = last_champ
@@ -1028,5 +1036,5 @@ def main():
 
 
 if __name__ == '__main__':
-    func.start_logging()
+    # func.start_logging()
     main()
