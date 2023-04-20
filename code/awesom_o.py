@@ -9,21 +9,27 @@ import shelve
 import time
 from pathlib import Path
 
+import functions as func
+import pyowm
 import requests
+import texts_for_bot as txt
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from pyowm.utils import timestamps
 from telegram import (Bot, InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
 
-import functions as func
-import texts_for_bot as txt
-
 load_dotenv()
-TOKEN = os.getenv('AWESOM_O_TOKEN')
-bot = Bot(token=TOKEN)
+BOT_TOKEN = os.getenv('AWESOM_O_TOKEN')
+OWM_TOKEN = os.getenv('OPENWEATHERMAP_TOKEN')
+bot = Bot(token=BOT_TOKEN)
+config = pyowm.utils.config.get_default_config()
+config['language'] = 'ru'
+owm = pyowm.OWM(OWM_TOKEN, config)
+weather_manager = owm.weather_manager()
 
 STATISTIC_PATH = str(Path(__file__).resolve().parent / 'statistic/statistic')
 
@@ -41,6 +47,7 @@ ENOUGH_BTN = 'Точно! Хватит 🖐'
 EXTRASENS_BTN = 'Круто! Ты экстрасенс 😲'
 HALL_OF_FAME_BTN = 'Зал Славы 🌟'
 HAVE_MERCY_BTN = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
+I_NEED_IT_BTN = 'Да брось! Мне действительно это нужно 😑'
 KOMBIKORM_BTN = 'Комбикорм! Ммм... Вкуснятина 😋'
 LETS_PLAY_BTN = 'Изи! Создавай 🤠'
 MATH_BAD_BTN = 'Математика явно не моё 😔'
@@ -58,8 +65,10 @@ STRANGE_NAME_BTN = 'Странное у тебя имя 🤔'
 STUPID_BTN = 'Я тупица... 😢'
 SURPRISE_ME_BTN = 'А ну-ка, удиви! 😐'
 TALANTS_BTN = 'Какие у тебя таланты 🤨'
+TOMORROW_BTN = 'А что на завтра?'
 WHAT_ARE_YOU_BTN = 'Да что ты такое 🤨'
 WIN_BACK_BTN = 'Дам тебе отыграться 😙'
+WILL_CHECK_BTN = 'Вот и проверим!'
 YOUR_TURN_BTN = 'Твой ход 👆'
 MAIN_MENU = [[CAT_BTN, ANECDOTE_BTN], [TALANTS_BTN, WHAT_ARE_YOU_BTN]]
 
@@ -75,6 +84,7 @@ MARINA = r'^Кто такая Маришка\??$'
 MARKLAR = r'.*[Мм]арклар'
 ZAJA = r'^Кто такой Зажа\??$'
 ZERO = r'.*[Пп]ритвор[ия](сь|ть?ся) ноликом'
+CITY_NAME = '^[ЁёА-я]{1,15}-? ?[ЁёА-я]{1,10}-? ?[ЁёА-я]{1,10}$'
 HIDDEN_PHRASES = f'{KENNY}|{CARTMAN}|{ZERO}|{MARKLAR}'
 HAVE_DOSSIERS = f'{CREATOR}|{KEP4IK}|{INNA}|{LEMUR}|{ZAJA}|{MARIK}|{MARINA}'
 
@@ -82,6 +92,7 @@ BIRTH_1, BIRTH_2, BIRTH_3, BIRTH_4, BIRTH_5 = range(5)
 FALAFEL = 1
 BOT_DICE, USER_BET, USER_DICE = range(3)
 HOROSCOPE_1, HOROSCOPE_2 = 1, 2
+WEATHER_1, WEATHER_2 = 1, 2
 
 
 def show_hidden_phrases(update, _):
@@ -200,7 +211,8 @@ def talants(update, _):
     buttons = [
         InlineKeyboardButton(text='День рождения', callback_data='Д'),
         InlineKeyboardButton(text='Гороскоп', callback_data='Г'),
-        InlineKeyboardButton(text='Игра в кости', callback_data='К')
+        InlineKeyboardButton(text='Игра в кости', callback_data='К'),
+        InlineKeyboardButton(text='Погода', callback_data='П')
     ]
     update.message.reply_text(
         text='Да я просто кладезь та-лантов 🤓',
@@ -228,6 +240,9 @@ def choice_talant(update, _):
     elif query_data == 'К':
         text = 'А как насчёт старой доброй игры в кости? 😉'
         button = [[LETS_PLAY_BTN], [NEXT_TIME_BTN]]
+    elif query_data == 'П':
+        text = 'Надеюсь, это не ради формаль-ного поддержания нашей беседы! 🤨'
+        button = [[I_NEED_IT_BTN]]
     query.answer()
     query.edit_message_text(text='✔️')
     time.sleep(1)
@@ -473,6 +488,97 @@ def zodiac_choose_sign(update, _):
     update.message.reply_text(text='Выбирай знак и не выё..живайся 😠')
 
 
+def weather_init(update, _):
+    f"""Ответ на нажатие кнопки {I_NEED_IT_BTN}."""
+    update.message.reply_text(
+        text='Ладно! Погода в каком месте тебя ин-тересует? 🧐',
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return WEATHER_1
+
+
+def weather_result(update, _):
+    """Ответ на указание пользователем конкретного города."""
+    global city_name  # для возможного использования в другой функции
+    mm_in_inch = 25.4
+    city_name = update.message.text
+    if not re.match(CITY_NAME, city_name):
+        update.message.reply_text(text='Напиши название населённого пункта ☝️')
+        return None
+    try:
+        observation = weather_manager.weather_at_place(city_name)
+    except pyowm.commons.exceptions.NotFoundError:
+        update.message.reply_text(
+            text='Такого места не нашлось! Очепятка? 🤔'
+        )
+        return None
+    except Exception as error:
+        logging.error(f'Ошибка при запросе к сервису погоды: {error}')
+        update.message.reply_text(
+            text='Не получается связаться с моим информа-тором ☹️\n'
+                 'Похоже он опять забыл оплатить интернет!\n'
+                 'Давай по-пробуем ещё раз позже...',
+            reply_markup=ReplyKeyboardMarkup(MAIN_MENU, resize_keyboard=True)
+        )
+        return ConversationHandler.END
+    else:
+        weather = observation.weather
+        detailed_status = weather.detailed_status
+        temperature = round(weather.temperature(unit='celsius')['temp'])
+        humidity = weather.humidity
+        wind = weather.wind()['speed']
+        pressure = round(
+            weather.barometric_pressure(unit='inHg')['press'] * mm_in_inch
+        )
+        sunrise = (
+            weather.sunrise_time(timeformat='date') + dt.timedelta(hours=3)
+        ).time()
+        sunrset = (
+            weather.sunset_time(timeformat='date') + dt.timedelta(hours=3)
+        ).time()
+        answer = (
+            f'На данный момент в {city_name} - {detailed_status}.\n'
+            f'Тем-пература 🌡 воздуха {temperature} °С, влажность '
+            F'{humidity}%.\nCкорость ветра составля-ет {wind} м/с 🌬\n'
+            f'Атмосфер-ное давление {pressure} мм рт. ст.\n'
+            f'Восход Солнца в {sunrise} 🔆 , закат в {sunrset} 🌅'
+        )
+        update.message.reply_text(
+            text='Мину-ту. Устанавливаю связь с Гидромед-центром... '
+                 'Получаю данные... 📠',
+        )
+        time.sleep(2)
+        update.message.reply_text(text=answer)
+        time.sleep(1)
+        update.message.reply_text(
+            text='И помни: метеоро-логи не ошибаются! '
+                 'Они прос-то могут перпутать время и место ☝️🤓',
+            reply_markup=ReplyKeyboardMarkup(
+                [[TOMORROW_BTN], [WILL_CHECK_BTN]], resize_keyboard=True
+            )
+        )
+        return WEATHER_2
+
+
+def weather_tomorrow_or_end(update, _):
+    f"""Ответ на фразу {TOMORROW_BTN} или {WILL_CHECK_BTN}."""
+    if update.message.text == WILL_CHECK_BTN:
+        text = 'Удачи!'
+    else:
+        forecast = weather_manager.forecast_at_place(city_name, '3h')
+        tomorrow = timestamps.tomorrow()  # datetime object for tomorrow
+        weather = forecast.get_weather_at(tomorrow)
+        detailed_status = weather.detailed_status
+        temperature = round(weather.temperature(unit='celsius')['temp'])
+        text = (f'Завтра будет {detailed_status} '
+                f'с температрой воздуха {temperature} °С 🌡')
+    update.message.reply_text(
+        text=text,
+        reply_markup=ReplyKeyboardMarkup(MAIN_MENU, resize_keyboard=True)
+    )
+    return ConversationHandler.END
+
+
 def what_are_you(update, _):
     f"""Ответ на нажатие кнопки {WHAT_ARE_YOU_BTN}."""
     button = ReplyKeyboardMarkup([[HAVE_MERCY_BTN]], resize_keyboard=True)
@@ -687,7 +793,7 @@ def bot_bet_roll_dice(update, _):
         )
     time.sleep(1)
     update.message.reply_text(
-        text='Твоя оче-редь. Делай ставку ☝️.',
+        text='Твоя оче-редь. Делай ставку ☝️',
         reply_markup=cancel
     )
     return USER_BET
@@ -897,7 +1003,7 @@ def go_on(update, _):
 
 def main():
     """Основная функция запуска бота."""
-    updater = Updater(token=TOKEN)
+    updater = Updater(token=BOT_TOKEN)
     handler = updater.dispatcher.add_handler
     handler(CommandHandler('start', wake_up))
     handler(CommandHandler('hidden', show_hidden_phrases))
@@ -1014,6 +1120,24 @@ def main():
         fallbacks=[]
     )
     handler(zodiac_сonversation)
+    weather_сonversation = ConversationHandler(
+        entry_points=[
+            MessageHandler(Filters.regex(I_NEED_IT_BTN),
+                           weather_init)
+        ],
+        states={
+            WEATHER_1: [
+                MessageHandler(Filters.all, weather_result)
+            ],
+            WEATHER_2: [
+                MessageHandler(
+                    Filters.regex(f'{TOMORROW_BTN}|{WILL_CHECK_BTN}'),
+                    weather_tomorrow_or_end)
+            ],
+        },
+        fallbacks=[]
+    )
+    handler(weather_сonversation)
     handler(MessageHandler(Filters.regex(STRANGE_NAME_BTN), strange_name))
     handler(MessageHandler(Filters.regex(CAT_BTN), show_cat_picture))
     handler(MessageHandler(Filters.regex(ANECDOTE_BTN), show_anecdote))
@@ -1030,11 +1154,11 @@ def main():
     )
     handler(MessageHandler(Filters.all & ~Filters.command, default_answer))
     handler(CallbackQueryHandler(stop_petting, pattern='stop_petting'))
-    handler(CallbackQueryHandler(choice_talant, pattern='Д|Г|К'))
+    handler(CallbackQueryHandler(choice_talant, pattern='Д|Г|К|П'))
     updater.start_polling()
     updater.idle()
 
 
 if __name__ == '__main__':
-    # func.start_logging()
+    func.start_logging()
     main()
