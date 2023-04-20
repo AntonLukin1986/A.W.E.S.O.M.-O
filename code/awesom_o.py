@@ -84,7 +84,7 @@ MARINA = r'^Кто такая Маришка\??$'
 MARKLAR = r'.*[Мм]арклар'
 ZAJA = r'^Кто такой Зажа\??$'
 ZERO = r'.*[Пп]ритвор[ия](сь|ть?ся) ноликом'
-CITY_NAME = '^[ЁёА-я]{1,15}-? ?[ЁёА-я]{1,10}-? ?[ЁёА-я]{1,10}$'
+CITY_NAME = r'^[ЁёА-я]{1,15}-? ?[ЁёА-я]{1,10}-? ?[ЁёА-я]{1,10}$'
 HIDDEN_PHRASES = f'{KENNY}|{CARTMAN}|{ZERO}|{MARKLAR}'
 HAVE_DOSSIERS = f'{CREATOR}|{KEP4IK}|{INNA}|{LEMUR}|{ZAJA}|{MARIK}|{MARINA}'
 
