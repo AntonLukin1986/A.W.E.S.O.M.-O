@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from pyowm.utils import timestamps
 from telegram import (Bot, InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardMarkup, ReplyKeyboardRemove)
+                      ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
@@ -66,7 +66,7 @@ STUPID_BTN = 'Я тупица... 😢'
 SURPRISE_ME_BTN = 'А ну-ка, удиви! 😐'
 TALANTS_BTN = 'Какие у тебя таланты 🤨'
 TOMORROW_BTN = 'А что на завтра?'
-WHAT_ARE_YOU_BTN = 'Да что ты такое 🤨'
+WHAT_ARE_YOU_BTN = 'Да что ты такое 🤔'
 WIN_BACK_BTN = 'Дам тебе отыграться 😙'
 WILL_CHECK_BTN = 'Вот и проверим!'
 YOUR_TURN_BTN = 'Твой ход 👆'
@@ -98,8 +98,23 @@ WEATHER_1, WEATHER_2 = 1, 2
 def show_hidden_phrases(update, _):
     """Реакция на команду /hidden - отобразить фразы-пасхалки для бота."""
     update.message.reply_text(
-        '*** Пасхалки ***\n🔸 Они убили Кенни\n🔸 Притворись ноликом\n'
-        '🔸 Эрик Картман\n🔸 Марклар'
+        '┌    `ПАСХАЛКИ`\n🔸 Они убили Кенни\n🔸 Притворись ноликом\n'
+        '🔸 Эрик Картман\n🔸 Марклар',
+        parse_mode=ParseMode.MARKDOWN_V2
+    )
+    # стилизация сообщений Markdown и HTML
+    update.message.reply_markdown_v2(
+        '➰ Markdown:\n*жирный*\n_курсив_\n`код`\n~перечеркнутый~\n'
+        '__подчеркнутый__\n||скрытый текст||\n'
+        '[ссылка](http://www.example.com/)'
+    )
+    bot.send_message(
+        update.effective_chat.id,
+        text=('➰ HTML:\n<b>жирный</b>\n<i>курсив</i>\n<code>код</code>\n'
+              '<s>перечеркнутый</s>\n<u>подчеркнутый</u>\n'
+              '<span class="tg-spoiler">скрытый текст</span>\n'
+              '<a href="http://www.example.com/">ссылка</a>'),
+        parse_mode=ParseMode.HTML
     )
 
 
@@ -324,8 +339,8 @@ def birthday_3(update, _):
         )
         time.sleep(1.5)
         update.message.reply_text(
-            text='Перепроверь, что посчитано без ошибок 🤓\n'
-                 'Если всё верно - напиши число, кото-рое у тебя по-лучилось.'
+            text='Пере-проверь, что посчитано без ошибок 🤓\n'
+                 'Если всё верно - напиши число, которое у тебя по-лучилось.'
         )
         return BIRTH_4
     else:
@@ -356,7 +371,7 @@ def birthday_4(update, _):
         time.sleep(1.5)
         update.message.reply_text(
             text='Так это же сегодня!\nПо-здравляю с Днём Варенья!\n'
-                 'Расти большой, не будь ла-пшой 🥳🎊🎉'
+                 'Расти большой, не будь лап-шой 🥳🎊🎉'
         )
     return BIRTH_5
 
@@ -369,7 +384,7 @@ def birthday_finish(update, _):
                 'Пе-реведи на мой электрон-ный кошелёк')
     else:
         text = ('Да ты просто счи-тать не умеешь 🤦🏻‍♂️\nА ещё говорят '
-                'человек - вершина эволюции.\nНу-ну... 🤔')
+                'человек - вершина эво-люции.\nНу-ну... 🤔')
     update.message.reply_text(text=text, reply_markup=button)
     return ConversationHandler.END
 
@@ -440,7 +455,7 @@ def zodiac_init_or_end(update, _):
     if update.message.text == ADORE_HOROSCOPE_BTN:
         update.message.reply_text(
             text='Если бы у ме-ня были лоб и рука - я бы сейчас сде-лал фэйс'
-                 'палм 🤦🏻‍♂️\nИ, возможно, повредил бы себе ми-кросхемы...\n'
+                 'палм 🤦🏻‍♂️\nИ, возможно, повредил бы себе микро-схемы...\n'
         )
         time.sleep(2)
         update.message.reply_text(
@@ -499,7 +514,7 @@ def weather_init(update, _):
 
 def weather_result(update, _):
     """Ответ на указание пользователем конкретного города."""
-    global city_name  # для возможного использования в другой функции
+    global city_name  # для возможного (!) использования в другой функции
     mm_in_inch = 25.4
     city_name = update.message.text
     if not re.match(CITY_NAME, city_name):
@@ -946,8 +961,9 @@ def show_hall_of_fame(update, _):
             places += f'{medals[-1]}  ' + f'{person[-1]}' + '\n'
             medals.pop()
             if not champion:
-                champion = f'Чемпион:  {person[-1]}  👑\n'
                 champ_name = person[-1]
+                champ_id = person[-2]
+                champion = f'Чемпион:  {champ_name}  👑\n'
         else:
             rest += (f'{person[-1]}  🔜  осталось сыграть:  {5 - person[5]}\n'
                      if person[5] < 5 else '  🔝\n')
@@ -956,10 +972,18 @@ def show_hall_of_fame(update, _):
             today = dt.date.today().strftime('%d.%m.%Y г.')
             db = shelve.open(STATISTIC_PATH)
             last_champ = db['DICE_CHAMPION']
-            last_champ.update({'name': champ_name, 'date': today})
+            last_champ.update(
+                {'name': champ_name, 'date': today, 'id': champ_id}
+            )
             db['DICE_CHAMPION'] = last_champ
             db.close()
             champion_from_date = today + '\n'
+            if last_champion['id'] != 'BOT':
+                bot.send_message(
+                    chat_id=last_champion['id'],
+                    text='Невероятно! 😯 Чем-пионом игры в кости становится '
+                         f'{champ_name}. Тебя только что смес-тили 🙅🏻‍♂️'
+                )
         else:
             champion_from_date = last_champion['date'] + '\n'
     bot.send_message(chat_id=chat_id,
@@ -969,7 +993,7 @@ def show_hall_of_fame(update, _):
     for (share_of_wins, average_dice_to_win, share_of_guessed_bet, dry_wins,
          triple_bet, games, wins, looses, made_bet, guessed_bet, double_six,
          share_of_double_six, double_one, share_of_double_one,
-         share_of_dry_wins, share_of_triple_bet, name) in rating:
+         share_of_dry_wins, share_of_triple_bet, _, name) in rating:
         bot.send_message(
             chat_id=chat_id,
             text=txt.RESULT.format(
@@ -982,8 +1006,7 @@ def show_hall_of_fame(update, _):
         )
     bot.send_message(
         chat_id=chat_id,
-        text='Ну что, готов(а) сместить текуще-го чемпиона? '
-             'Кажется, он уже за-сиделся... 🤫'
+        text='Ну что, готов(а) со мной сразиться? 😈'
     )
     return BOT_DICE
 

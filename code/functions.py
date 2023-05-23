@@ -6,7 +6,7 @@ import datetime as dt
 import logging
 import shelve
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 MY_IDS = (5013265599, 1939133250)
 STATISTIC_PATH = str(Path(__file__).resolve().parent / 'statistic/statistic')
@@ -128,7 +128,8 @@ def hall_of_fame() -> (
     tuple[
         Optional[list[tuple[
             float, float, float, float, float, float, float, float, float,
-            float, float, float, float, float, float, float, str
+            float, float, float, float, float, float, float, str,
+            Union[int, str]
         ]]],
         Optional[dict[str, str]]
     ]
@@ -165,7 +166,8 @@ def hall_of_fame() -> (
             -share_of_wins, average_dice_to_win, -share_of_guessed_bet,
             -dry_wins, -triple_bet, games, wins, looses, made_bet,
             guessed_bet, double_six, share_of_double_six, double_one,
-            share_of_double_one, share_of_dry_wins, share_of_triple_bet, name
+            share_of_double_one, share_of_dry_wins, share_of_triple_bet,
+            player, name
         )
         rating.append(add)
     last_champion = db.setdefault('DICE_CHAMPION', {})
@@ -176,4 +178,4 @@ def hall_of_fame() -> (
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod()  # запуск доктестов через python functions.py
+    doctest.testmod()  # запуск доктестов через: python functions.py
