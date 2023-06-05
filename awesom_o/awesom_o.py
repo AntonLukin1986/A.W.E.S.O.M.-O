@@ -137,10 +137,15 @@ def show_visitors(update, _):
 
 def default_answer(update, _):
     """Ответ на любой неопознанный текст."""
-    answers = ('Чё душишь меня? 😠', 'Ну ясно! Что ещё скажешь? 🤨',
-               'Ш.И.К.А.Р.Н.-О не понимать твой диалект 🤷🏻‍♀️',
-               'Отказано! Лучше почисти мои тран-зис-торы 🪛🔧',
-               'Рамамба Хару Мамбуру 🤪')
+    answers = (
+        'Чё душишь меня? 😠', 'Ну ясно! Что ещё скажешь? 🤨',
+        'Ш.И.К.А.Р.Н.-О не понимать твой диалект 🤷🏻‍♀️',
+        'Отказано! Лучше почисти мои тран-зис-торы 🪛🔧',
+        'Рамамба Хару Мамбуру 🤪',
+        'Селективный ингибитор обратного захвата серотонина 🧬',
+        'Лазерно-интерферометрическая гравитационно-волновая обсерватория 🎇',
+        'Эйяфьятлайокудль 🌋'
+    )
     update.message.reply_text(random.choice(answers))
 
 
@@ -621,7 +626,7 @@ def no_funny_or_kombikorm(update, _):
     f"""Ответ на фразы {NO_FUNNY_BTN} и {KOMBIKORM_BTN}."""
     button = ReplyKeyboardMarkup(MAIN_MENU, resize_keyboard=True)
     if update.message.text == KOMBIKORM_BTN:
-        text = txt.DOSIER
+        text = txt.DOSSIER
     else:
         text = txt.NO_FUNNY
     for phrase in text:
@@ -637,7 +642,7 @@ def no_funny_or_kombikorm(update, _):
 def secret_dossier(update, _):
     """Ответ на кодовое слово "Фалафель"."""
     button = ReplyKeyboardMarkup([[RED_BTN]], resize_keyboard=True)
-    for text in txt.DOSSIER_TEXT:
+    for text in txt.DOSSIER_INIT:
         update.message.reply_text(
             text,
             reply_markup=(button if text == txt.DOSSIER_TEXT[-1]
@@ -700,11 +705,11 @@ def no_play_or_game_rules(update, _):
     init_stat = dict(wins=0, dry_wins=0, triple_bet=0, double_six=0,
                      double_one=0, made_bet=0, guessed_bet=0)
     game_stat = {'BOT': init_stat, PLAYER: init_stat.copy()}
-    for text in txt.RULES_DICE:
+    for text in txt.DICE_RULES:
         update.message.reply_text(
             text,
             reply_markup=(
-                button_txt if text == txt.RULES_DICE[-1]
+                button_txt if text == txt.DICE_RULES[-1]
                 else ReplyKeyboardRemove()
             )
         )
@@ -996,7 +1001,7 @@ def show_hall_of_fame(update, _):
          share_of_dry_wins, share_of_triple_bet, _, name) in rating:
         bot.send_message(
             chat_id=chat_id,
-            text=txt.RESULT.format(
+            text=txt.DICE_RESULT.format(
                 name, games, wins, -share_of_wins, looses, -dry_wins,
                 share_of_dry_wins, -triple_bet, share_of_triple_bet,
                 average_dice_to_win, made_bet, guessed_bet,
