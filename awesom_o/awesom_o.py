@@ -1,13 +1,13 @@
 """Телеграм-бот Ш.И.К.А.Р.Н.-О."""
 
 import datetime as dt
-from glob import glob
+# from glob import glob
 import logging
 import os
 import random
 import re
 import shelve
-import shutil
+# import shutil
 import time
 from pathlib import Path
 
@@ -33,10 +33,14 @@ config['language'] = 'ru'
 owm = pyowm.OWM(OWM_TOKEN, config)
 weather_manager = owm.weather_manager()
 
-if 'AMVERA' in os.environ:  # при деплое на хосте "АМВЕРА"
-    STATISTIC_PATH = '/data/statistic/statistic'
-    if not glob('/data/statistic'):
-        shutil.copytree('awesom_o/statistic', 'data')
+if 'AMVERA' in os.environ:  # при деплое на хост "АМВЕРА"
+    print('listdir(/) ', os.listdir('/'))
+    print('listdir() ', os.listdir())
+    print('listdir("awesom_o") ', os.listdir('awesom_o'))
+    print('listdir("data") ', os.listdir('data'))
+    # STATISTIC_PATH = '/data/statistic/statistic'
+    # if not glob('/data/statistic'):
+    #     shutil.copytree('awesom_o/statistic', 'data')
 else:
     STATISTIC_PATH = str(
         Path(__file__).resolve().parent / 'statistic/statistic'
@@ -141,10 +145,7 @@ def answer_hidden_phrases(update, _):
 
 def show_visitors(update, _):
     """Реакция на команду /visitors - отобразить посетителей бота."""
-    # update.message.reply_text(text=func.visitors_list())
-    print('glob', glob('/data/statistic'))
-    print('STATISTIC_PATH', STATISTIC_PATH)
-    print(os.listdir('/'))
+    update.message.reply_text(text=func.visitors_list())
 
 
 def default_answer(update, _):
