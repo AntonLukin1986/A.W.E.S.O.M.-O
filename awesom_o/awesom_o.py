@@ -36,8 +36,8 @@ weather_manager = owm.weather_manager()
 if 'AMVERA' in os.environ:  # при деплое на хост "АМВЕРА"
     print('listdir(/) ', os.listdir('/'))
     print('listdir() ', os.listdir())
-    print('listdir("awesom_o") ', os.listdir('awesom_o'))
-    print('listdir("data") ', os.listdir('data'))
+    print('listdir("awesom_o") ', os.listdir('../awesom_o'))
+    print('listdir("data") ', os.listdir('../data'))
     # STATISTIC_PATH = '/data/statistic/statistic'
     # if not glob('/data/statistic'):
     #     shutil.copytree('awesom_o/statistic', 'data')
