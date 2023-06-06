@@ -61,7 +61,7 @@ def record_new_visitor(update) -> None:
         user = update.message.chat
         joined = dt.date.today().strftime('%d.%m.%Y')
         data = (f'ник: {user.username}, имя: {user.full_name}, '
-                f'дата: {joined}\n')
+                f'дата: {joined}')
         visitors[user_id] = data
         db['VISITORS'] = visitors
     db.close()
@@ -73,11 +73,11 @@ def visitors_list() -> str:
     db = shelve.open(STATISTIC_PATH)
     visitors = db.get('VISITORS')
     if not visitors:
-        text = 'Посетителей не было 🙅🏻‍♂️'
+        text = 'Посетителей ещё не было 🙅🏻‍♂️'
     else:
         text = '✏️    Посетители:\n'
         for i, person in enumerate(visitors.values(), start=1):
-            text += f'{i}. {person}\n'
+            text += f'{i}. {person}'
     db.close()
     return text
 

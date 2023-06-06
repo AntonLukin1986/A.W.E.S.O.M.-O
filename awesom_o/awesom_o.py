@@ -34,13 +34,9 @@ owm = pyowm.OWM(OWM_TOKEN, config)
 weather_manager = owm.weather_manager()
 
 if 'AMVERA' in os.environ:  # при деплое на хост "АМВЕРА"
-    print('listdir(/) >>', os.listdir('/'))
-    print('listdir() >>', os.listdir())
-    print('listdir("data") >>', os.listdir('/data'))
     STATISTIC_PATH = '/data/statistic/statistic'
     if not glob('/data/statistic'):
-        shutil.copytree('/awesom_o/statistic', '../data/statistic')
-    print('listdir("data") after copytree >>', os.listdir('../data'))
+        shutil.copytree('/awesom_o/statistic', '/data/statistic')
 else:
     STATISTIC_PATH = str(
         Path(__file__).resolve().parent / 'statistic/statistic'
@@ -1201,5 +1197,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # func.start_logging()
+    func.start_logging()
     main()
