@@ -1,13 +1,13 @@
 """Телеграм-бот Ш.И.К.А.Р.Н.-О."""
 
 import datetime as dt
-# from glob import glob
+from glob import glob
 import logging
 import os
 import random
 import re
 import shelve
-# import shutil
+import shutil
 import time
 from pathlib import Path
 
@@ -34,13 +34,14 @@ owm = pyowm.OWM(OWM_TOKEN, config)
 weather_manager = owm.weather_manager()
 
 if 'AMVERA' in os.environ:  # при деплое на хост "АМВЕРА"
-    print('listdir(/) ', os.listdir('/'))
-    print('listdir() ', os.listdir())
-    print('listdir("awesom_o") ', os.listdir('../awesom_o'))
-    print('listdir("data") ', os.listdir('../data'))
-    # STATISTIC_PATH = '/data/statistic/statistic'
-    # if not glob('/data/statistic'):
-    #     shutil.copytree('awesom_o/statistic', 'data')
+    print('listdir(/) >>', os.listdir('/'))
+    print('listdir() >>', os.listdir())
+    print('listdir("awesom_o") >>', os.listdir('../awesom_o'))
+    print('listdir("data") >>', os.listdir('../data'))
+    STATISTIC_PATH = '/data/statistic/statistic'
+    if not glob('/data/statistic'):
+        shutil.copytree('/awesom_o/statistic', '../data')
+    print('listdir("data") after copytree >>', os.listdir('../data'))
 else:
     STATISTIC_PATH = str(
         Path(__file__).resolve().parent / 'statistic/statistic'
