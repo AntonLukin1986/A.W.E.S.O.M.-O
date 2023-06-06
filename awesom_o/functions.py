@@ -5,11 +5,11 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import shelve
-from pathlib import Path
 from typing import Optional, Union
 
+from awesom_o import STATISTIC_PATH
+
 MY_IDS = (5013265599, 1939133250)
-STATISTIC_PATH = str(Path(__file__).resolve().parent / 'statistic/statistic')
 
 
 def start_logging() -> None:

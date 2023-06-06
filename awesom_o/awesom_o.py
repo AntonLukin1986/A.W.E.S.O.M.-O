@@ -1,11 +1,13 @@
 """Телеграм-бот Ш.И.К.А.Р.Н.-О."""
 
 import datetime as dt
+from glob import glob
 import logging
 import os
 import random
 import re
 import shelve
+import shutil
 import time
 from pathlib import Path
 
@@ -31,7 +33,14 @@ config['language'] = 'ru'
 owm = pyowm.OWM(OWM_TOKEN, config)
 weather_manager = owm.weather_manager()
 
-STATISTIC_PATH = str(Path(__file__).resolve().parent / 'statistic/statistic')
+if 'AMVERA' in os.environ:  # при деплое на хосте "АМВЕРА"
+    STATISTIC_PATH = '/data/statistic/statistic'
+    if not glob('/data/statistic'):
+        shutil.copytree('awesom_o/statistic', 'data')
+else:
+    STATISTIC_PATH = str(
+        Path(__file__).resolve().parent / 'statistic/statistic'
+    )
 
 ADORE_HOROSCOPE_BTN = ('Ух ты! Обожаю гороскопы 😍 Они всегда сбываются! '
                        'И вообще, мой знак зодиака - самый лучший 🤘')

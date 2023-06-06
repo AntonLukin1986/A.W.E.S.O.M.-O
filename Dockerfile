@@ -1,6 +1,6 @@
 FROM python:3.7-slim
 
-WORKDIR /awesom_o_bot
+WORKDIR /awesom_o
 
 COPY requirements.txt .
 
