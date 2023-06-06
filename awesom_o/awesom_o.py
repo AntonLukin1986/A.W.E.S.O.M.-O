@@ -141,7 +141,10 @@ def answer_hidden_phrases(update, _):
 
 def show_visitors(update, _):
     """Реакция на команду /visitors - отобразить посетителей бота."""
-    update.message.reply_text(text=func.visitors_list())
+    # update.message.reply_text(text=func.visitors_list())
+    print('glob', glob('/data/statistic'))
+    print('STATISTIC_PATH', STATISTIC_PATH)
+    print(os.listdir('/'))
 
 
 def default_answer(update, _):
@@ -1197,5 +1200,5 @@ def main():
 
 
 if __name__ == '__main__':
-    func.start_logging()
+    # func.start_logging()
     main()
