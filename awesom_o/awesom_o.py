@@ -40,7 +40,7 @@ if 'AMVERA' in os.environ:  # при деплое на хост "АМВЕРА"
     print('listdir("data") >>', os.listdir('../data'))
     STATISTIC_PATH = '/data/statistic/statistic'
     if not glob('/data/statistic'):
-        shutil.copytree('/awesom_o/statistic', '../data/')
+        shutil.copytree('/awesom_o/statistic', '../data/statistic')
     print('listdir("data") after copytree >>', os.listdir('../data'))
 else:
     STATISTIC_PATH = str(
