@@ -84,7 +84,7 @@ def visitors_list() -> str:
 
 def dice_game_stat(game_stat: dict[str, dict[str, int]], player: int,
                    name: str) -> str:
-    """Анализ статистики. Выводится в конце раунда и сохраненяется в БД."""
+    """Анализ статистики. Выводится в конце раунда и сохраняется в БД."""
     bot_win = game_stat['BOT']['wins']
     bot_made_bet = game_stat['BOT']['made_bet']
     bot_guessed_bet = game_stat['BOT']['guessed_bet']
@@ -174,6 +174,52 @@ def hall_of_fame() -> (
     db.close()
     rating.sort()
     return rating, last_champion
+
+
+def calc_win_stat_save(update, result: int) -> None:
+    """Запись статистики игрока в Calc & Win."""
+    player = update.callback_query.message.chat
+    player_id = player.id
+    name = f'Ник: {player.username}\nИмя: {player.full_name}'
+    db = shelve.open(STATISTIC_PATH)
+    players = db.setdefault('CALC&WIN', {})
+    if player_id not in players:
+        players[player_id] = {'name': name, 'games': 1, 'wins': result}
+    else:
+        players[player_id]['name'] = name  # если игрок изменил данные
+        players[player_id]['games'] += 1
+        players[player_id]['wins'] += result
+    db['CALC&WIN'] = players
+    db.close()
+
+
+def calc_win_stat_load() -> str:
+    """Загрузка статистики игроков в Calc & Win."""
+    import operator
+    with shelve.open(STATISTIC_PATH) as db:
+        players = db['CALC&WIN']
+    players_list = []
+    for player_id in players:
+        share = players[player_id]['wins'] / players[player_id]['games']
+        percents = round(share * 100, 2)
+        players_list.append(
+            (player_id, players[player_id]['games'], percents)
+        )
+    # сортировка по 1 и 2му элементам кортежа
+    players_list.sort(reverse=True, key=operator.itemgetter(1, 2))
+    text = '✏️ <i><b>Статистика игроков:</b></i>'
+    for i, player in enumerate(players_list, start=1):
+        player_id = player[0]
+        text += (
+            '\n<b>[{0}]</b> '
+            '{1}\nВсего сражений:  <b>{2}</b>\nПобеды:  <b>{3}</b>'.format(
+                i, players[player_id]['name'], players[player_id]['games'],
+                players[player_id]['wins']
+            )
+        )
+        text += f' → <i>{player[2]}%</i>'
+    db.close()
+    return text
 
 
 if __name__ == '__main__':

@@ -4,12 +4,12 @@ import datetime as dt
 from glob import glob
 import logging
 import os
+from pathlib import Path
 import random
 import re
 import shelve
 import shutil
 import time
-from pathlib import Path
 
 import functions as func
 import pyowm
@@ -25,7 +25,7 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           Updater)
 
 load_dotenv()
-BOT_TOKEN = os.getenv('AWESOM_O_TOKEN')
+BOT_TOKEN = os.getenv('TEST_BOT_TOKEN')
 OWM_TOKEN = os.getenv('OPENWEATHERMAP_TOKEN')
 bot = Bot(token=BOT_TOKEN)
 config = pyowm.utils.config.get_default_config()
@@ -41,10 +41,10 @@ else:
     STATISTIC_PATH = str(
         Path(__file__).resolve().parent / 'statistic/statistic'
     )
-
 ADORE_HOROSCOPE_BTN = ('Ух ты! Обожаю гороскопы 😍 Они всегда сбываются! '
                        'И вообще, мой знак зодиака - самый лучший 🤘')
 ANECDOTE_BTN = 'Расскажи анекдот 😃'
+ATTACK_BTN = 'Атакую 👊'
 BEGIN_BTN = 'Поехали 👌'
 BRAVO_BTN = 'Браво! Это гениально 🤣'
 CAT_BTN = 'Котика хочу 🐈'
@@ -53,12 +53,14 @@ DICE_BTN = ReplyKeyboardMarkup([['🎲']], resize_keyboard=True)
 DONE_NEXT_BTN = 'Сделано ✔️ Давай дальше'
 EAT_CORN_BTN = 'Пойду грызть свою кукурузку 😋'
 ENOUGH_BTN = 'Точно! Хватит 🖐'
+EXIT_GAME_BTN = 'Сыграем позже 👎'
 EXTRASENS_BTN = 'Круто! Ты экстрасенс 😲'
 HALL_OF_FAME_BTN = 'Зал Славы 🌟'
 HAVE_MERCY_BTN = 'О, нет! Ш.И.К.А.Р.Н.-О, пощади 😨🙏'
 I_NEED_IT_BTN = 'Да брось! Мне действительно это нужно 😑'
 KOMBIKORM_BTN = 'Комбикорм! Ммм... Вкуснятина 😋'
 LETS_PLAY_BTN = 'Изи! Создавай 🤠'
+NO_TRANSACTIONS_BTN = 'Лишь бы микротранзакций не было 🥴'
 MATH_BAD_BTN = 'Математика явно не моё 😔'
 NEGATIVE_BTN = 'Нет, я передумал 🙃'
 NEXT_TIME_BTN = 'В другой раз 🙅🏻‍♂️'
@@ -66,6 +68,7 @@ NO_FUNNY_BTN = 'Очень смешно 😤'
 NO_MORE_GAME_BTN = 'Больше не хочу играть 😐'
 NOT_MY_BIRTH_BTN = 'Неа, неверно! 🤨'
 NOT_STUPID_BTN = 'Я тебе не тупица! 😤'
+PLAY_GAME_BTN = 'Давай гамать 👍'
 RED_BTN = 'Красная кнопка 🔴'
 REVENGE_BTN = 'Хочу реванш 🥊'
 SO_INTERESTING_BTN = 'А это уже интересно 🤔'
@@ -241,7 +244,8 @@ def talants(update, _):
         InlineKeyboardButton(text='День рождения', callback_data='Д'),
         InlineKeyboardButton(text='Гороскоп', callback_data='Г'),
         InlineKeyboardButton(text='Игра в кости', callback_data='К'),
-        InlineKeyboardButton(text='Погода', callback_data='П')
+        InlineKeyboardButton(text='Погода', callback_data='П'),
+        InlineKeyboardButton(text='Игра Calc & Win', callback_data='В'),
     ]
     update.message.reply_text(
         text='Да я просто кладезь та-лантов 🤓',
@@ -264,14 +268,17 @@ def choice_talant(update, _):
                 'могу угадать день твоего ро-ждения 🧙🏻')
         button = [[SURPRISE_ME_BTN]]
     elif query_data == 'Г':
-        text = 'Могу рассказать твой гороскоп 🤓'
+        text = 'Могу рассказать твой горо-скоп 🤓'
         button = [[SO_INTERESTING_BTN]]
     elif query_data == 'К':
-        text = 'А как насчёт старой доброй игры в кости? 😉'
+        text = 'А как насчёт ста-рой доброй игры в кости? 😉'
         button = [[LETS_PLAY_BTN], [NEXT_TIME_BTN]]
     elif query_data == 'П':
-        text = 'Надеюсь, это не ради формаль-ного поддержания нашей беседы! 🤨'
+        text = 'Надеюсь, это не ради формаль-ного поддержания нашей бе-седы! 🤨'
         button = [[I_NEED_IT_BTN]]
+    elif query_data == 'В':
+        text = 'Это лучшая игра, что тебе до-водилось видеть 😃'
+        button = [[NO_TRANSACTIONS_BTN]]
     query.answer()
     query.edit_message_text(text='✔️')
     time.sleep(1)
@@ -379,8 +386,10 @@ def birthday_4(update, _):
         return None
     update.message.reply_text(text='Барабанная дробь... 🥁')
     time.sleep(1.5)
-    update.message.reply_text(text=f'День твоего рождения ⚜️ {day} {month} ⚜️',
-                              reply_markup=button)
+    update.message.reply_text(
+        text=f'День твоего рождения\n⚜️ {day} {month} ⚜️',
+        reply_markup=button
+    )
     if str(result) == dt.date.today().strftime('%d%m'):
         time.sleep(1.5)
         update.message.reply_text(
@@ -830,20 +839,32 @@ def bot_bet_roll_dice(update, _):
 
 def user_bets(update, _):
     """Ответ на ввод пользователем двух чисел перед бросками кубиков."""
-    global user_bet_1, user_bet_2, triple_bet_user
+    global anti_cheat, user_bet_1, user_bet_2, triple_bet_user
     user_bet_1, user_bet_2 = map(int, (update.message.text).split())
     if user_bet_1 == user_bet_2:
         update.message.reply_text(
             'Числа должны быть раз-ными! Это в твоих же инте-ресах 🤦🏻‍♂️'
         )
         return None
-    else:
-        update.message.reply_text(
-            text='Принято! Бросай кос-ти 🎲', reply_markup=DICE_BTN
-        )
-        game_stat[PLAYER]['made_bet'] += 1
-        triple_bet_user += 1
-        return USER_DICE
+    # античит для Кэпа
+    if PLAYER == 528328668:
+        if (
+            'anti_cheat' in globals()
+            and (user_bet_1 in anti_cheat or user_bet_2 in anti_cheat)
+        ):
+            update.message.reply_text(
+                'Внимание ❗️ Сработала система АНТИЧИТ 🤬\n'
+                'Обнаружено дублирование предыдущей ставки.\n'
+                'Докажите, что вы не БОТ 🤖 - используйте другие цифры.'
+            )
+            return None
+        anti_cheat = (user_bet_1, user_bet_2)
+    update.message.reply_text(
+        text='Принято! Бросай кос-ти 🎲', reply_markup=DICE_BTN
+    )
+    game_stat[PLAYER]['made_bet'] += 1
+    triple_bet_user += 1
+    return USER_DICE
 
 
 def user_roll_dice(update, _):
@@ -1038,6 +1059,94 @@ def go_on(update, _):
     update.message.reply_text('Тебе ну-жно бросить кубик. Сосре-доточься 🤨')
 
 
+def calc_and_win_game_init(update, _):
+    f"""Ответ на нажатие кнопки {NO_TRANSACTIONS_BTN}."""
+    buttons = ReplyKeyboardMarkup([[PLAY_GAME_BTN], [EXIT_GAME_BTN]],
+                                  resize_keyboard=True)
+    update.message.reply_markdown_v2(text=txt.RULES, reply_markup=buttons)
+    return 'game_1'
+
+
+def play_or_exit_game(update, _):
+    f"""Ответ на кнопки {EXIT_GAME_BTN} и {PLAY_GAME_BTN}."""
+    if update.message.text == EXIT_GAME_BTN:
+        update.message.reply_text(
+            text='Буду ждать тебя на этом са-мом месте. Не задерживай-ся 😼',
+            reply_markup=ReplyKeyboardMarkup(MAIN_MENU, resize_keyboard=True)
+        )
+        return ConversationHandler.END
+    from random import randint
+    global enemy_health, total_attacks, total_damage
+    total_attacks = 1
+    total_damage = 0
+    enemy_health = randint(80, 120)
+    hint = 'ХХ' if len(str(enemy_health)) == 2 else 'ХХХ'
+    update.message.reply_text(
+        text=f'Противник получает {hint} ♥',
+        reply_markup=ReplyKeyboardMarkup([[ATTACK_BTN]], resize_keyboard=True))
+    return 'game_2'
+
+
+def attack_in_game(update, _):
+    f"""Ответ на кнопку {ATTACK_BTN}."""
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton(text='LITE | урон 1-5', callback_data='lite')],
+        [InlineKeyboardButton(text='MID | урон 10-20', callback_data='mid')],
+        [InlineKeyboardButton(text='HARD | урон 30-40', callback_data='hard')]
+    ])
+    update.message.reply_text(text=f'Атака №{total_attacks}',
+                              reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text(text='Выбери тип атаки', reply_markup=buttons)
+    return 'game_2'
+
+
+def attack_result(update, _):
+    """Вычисление результата атаки."""
+    from random import randint
+    global total_attacks, total_damage
+    pushed_btn = {'lite': 'Лёгкая', 'mid': 'Средняя', 'hard': 'Тяжёлая'}
+    ranges = {'lite': (1, 5), 'mid': (10, 20), 'hard': (30, 40)}
+    chat_id = update.effective_chat.id
+    query = update.callback_query
+    query_data = query.data
+    query.answer()
+    query.edit_message_text(text=f'► {pushed_btn[query_data]} атака ◄')
+    damage = randint(*ranges[query_data])
+    total_damage += damage
+    text = (f'Атака нанесла ► {damage} урона\n'
+            f'Осталось атак  ►  {5 - total_attacks}\n'
+            f'Всего урона  ►  {total_damage}')
+    bot.send_message(
+        chat_id=chat_id, text=text,
+        reply_markup=ReplyKeyboardMarkup([[ATTACK_BTN]], resize_keyboard=True)
+    )
+    total_attacks += 1
+    if total_attacks > 5:
+        difference = abs(enemy_health - total_damage)
+        result = '\nТы победил 💪' if difference <= 5 else '\nТы проиграл 🫵'
+        result_save = 1 if difference <= 5 else 0
+        text = (f'Здоровье противника до боя  ►  {enemy_health}'
+                f'\nНанесено урона всего  ►  {total_damage}')
+        text += result
+        buttons = ReplyKeyboardMarkup(
+            [[PLAY_GAME_BTN], [EXIT_GAME_BTN]], resize_keyboard=True
+        )
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=buttons)
+        func.calc_win_stat_save(update, result_save)
+        statistic = func.calc_win_stat_load()
+        bot.send_message(chat_id=chat_id, text=statistic, reply_markup=buttons,
+                         parse_mode=ParseMode.HTML)
+        return 'game_1'
+    return 'game_2'
+
+
+def default_answer_game(update, _):
+    """Стандартный ответ в игре Calc & Win."""
+    update.message.reply_text(
+        'Тебе нуж-но нажимать на кнопки, а не писать всякую е-рунду 🙉'
+    )
+
+
 def main():
     """Основная функция запуска бота."""
     updater = Updater(token=BOT_TOKEN)
@@ -1175,6 +1284,20 @@ def main():
         fallbacks=[]
     )
     handler(weather_сonversation)
+    calc_and_win_game_сonversation = ConversationHandler(
+        entry_points=[MessageHandler(Filters.regex(NO_TRANSACTIONS_BTN),
+                      calc_and_win_game_init)],
+        states={
+            'game_1': [MessageHandler(
+                Filters.regex(f'{PLAY_GAME_BTN}|{EXIT_GAME_BTN}'),
+                play_or_exit_game)],
+            'game_2': [MessageHandler(
+                Filters.regex(f'{ATTACK_BTN}'), attack_in_game),
+                CallbackQueryHandler(attack_result, pattern='lite|mid|hard')],
+        },
+        fallbacks=[MessageHandler(Filters.all, default_answer_game)]
+    )
+    handler(calc_and_win_game_сonversation)
     handler(MessageHandler(Filters.regex(STRANGE_NAME_BTN), strange_name))
     handler(MessageHandler(Filters.regex(CAT_BTN), show_cat_picture))
     handler(MessageHandler(Filters.regex(ANECDOTE_BTN), show_anecdote))
@@ -1191,11 +1314,11 @@ def main():
     )
     handler(MessageHandler(Filters.all & ~Filters.command, default_answer))
     handler(CallbackQueryHandler(stop_petting, pattern='stop_petting'))
-    handler(CallbackQueryHandler(choice_talant, pattern='Д|Г|К|П'))
+    handler(CallbackQueryHandler(choice_talant, pattern='Д|Г|К|П|В'))
     updater.start_polling()
     updater.idle()
 
 
 if __name__ == '__main__':
-    func.start_logging()
+    # func.start_logging()
     main()
